@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@storymee/api-client": "file:../../0-Shared-Libs/api-client",
+    "@storymeedev/api-client": "*",
     "autoprefixer": "^10.5.0",
     "lucide-react": "^1.16.0",
     "postcss": "^8.5.15",
