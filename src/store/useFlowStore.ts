@@ -241,7 +241,7 @@ export const useFlowStore = create<FlowState>()(
       },
       setProjectData: (data) => set({ projectData: data }),
 
-      isDrawerOpen: true,
+      isDrawerOpen: false,
       setIsDrawerOpen: (isOpen) => set({ isDrawerOpen: isOpen }),
 
       isSettingOpen: false,

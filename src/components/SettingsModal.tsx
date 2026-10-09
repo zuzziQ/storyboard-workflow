@@ -25,7 +25,7 @@ export default function SettingsModal() {
       setCustomApiUrl('');
     } else {
       setHubUrl(`http://${localIp}:5100`);
-      setCustomApiUrl(`http://${localIp}:4500`);
+      setCustomApiUrl(`http://${localIp}:5100`);
     }
   }, [hubConnectionMode, localIp]);
 
@@ -180,7 +180,7 @@ export default function SettingsModal() {
       // Save custom api url override and Hub API Key
       if (typeof window !== 'undefined') {
         localStorage.setItem('STORYMEE_HUB_API_KEY', hubApiKey);
-        const finalCustomUrl = hubConnectionMode === 'local' ? `http://${localIp}:4500` : '';
+        const finalCustomUrl = hubConnectionMode === 'local' ? `http://${localIp}:5100` : '';
         if (finalCustomUrl) {
           localStorage.setItem('STORYMEE_CUSTOM_API_URL', finalCustomUrl);
         } else {

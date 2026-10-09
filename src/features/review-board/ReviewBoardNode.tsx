@@ -69,8 +69,29 @@ function ReviewBoardNode({ id, data }: any) {
   const allNodes = getNodes();
 
   const parsedData = useFlowStore(state => state.parsedData);
-  const shots = parsedData?.shots || [];
-  const scenes = parsedData?.scenes || [];
+  const pendingShots = useFlowStore(state => state.pendingShots);
+  const shots = useMemo(() => {
+    if (pendingShots && pendingShots.length > 0) return pendingShots;
+    if (parsedData?.shots && parsedData.shots.length > 0) return parsedData.shots;
+    return [];
+  }, [pendingShots, parsedData]);
+  const scenes = useMemo(() => {
+    if (parsedData?.scenes && parsedData.scenes.length > 0) return parsedData.scenes;
+    const sceneNodes = allNodes.filter(n => n.type === 'sceneNode');
+    if (sceneNodes.length > 0) {
+      return sceneNodes.map(sn => ({
+        id: sn.data?.sceneId || sn.id,
+        sceneId: sn.data?.sceneId || sn.id,
+        sceneNumber: sn.data?.sceneNumber,
+        location: sn.data?.location,
+        timeOfDay: sn.data?.timeOfDay,
+        action: sn.data?.action || sn.data?.title,
+        renderUrl: sn.data?.renderUrl || sn.data?.imageUrl,
+        imageUrl: sn.data?.imageUrl || sn.data?.renderUrl
+      }));
+    }
+    return [];
+  }, [parsedData, allNodes]);
   const customProjectRules = useFlowStore(state => state.customProjectRules || []);
   const customEpisodeRules = useFlowStore(state => state.customEpisodeRules || []);
 
@@ -193,7 +214,7 @@ function ReviewBoardNode({ id, data }: any) {
     const mockSceneNode = {
       id: 'review-board-main',
       isSubScene: true,
-      subIndex: parsedData?.shots?.findIndex((s: any) => s.beat === shot.beat || s.id === shot.id) ?? 0,
+      subIndex: shots.findIndex((s: any) => s.beat === shot.beat || s.id === shot.id) ?? 0,
       data: shot
     };
     runImageGenForScene(mockSceneNode, () => {}, modelId).catch(err => console.error(err));
@@ -203,7 +224,7 @@ function ReviewBoardNode({ id, data }: any) {
     const mockVideoNode = {
       id: 'review-board-main',
       isSubVideo: true,
-      subIndex: parsedData?.shots?.findIndex((s: any) => s.beat === shot.beat || s.id === shot.id) ?? 0,
+      subIndex: shots.findIndex((s: any) => s.beat === shot.beat || s.id === shot.id) ?? 0,
       data: shot
     };
     runVideoGenForScene(mockVideoNode, () => {}, modelId).catch(err => console.error(err));
@@ -345,7 +366,7 @@ function ReviewBoardNode({ id, data }: any) {
 
        linkedAssetIds.forEach(assetId => {
           const tagId = `scene_gen_${id.toLowerCase()}_${Date.now()}`;
-          fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+          fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
              method: 'POST',
              headers,
              body: JSON.stringify({
@@ -597,8 +618,11 @@ function ReviewBoardNode({ id, data }: any) {
                 const sShots = shots.filter((sh: any) => isSameScene(sh.sceneId || sh.sc || sh.scene_id, sId));
                 
                 // Find first rendered storyboard in this scene
-                const renderedShot = sShots.find((sh: any) => sh.renderUrl || sh.imageUrl);
-                const sUrl = renderedShot ? (renderedShot.renderUrl || renderedShot.imageUrl) : null;
+                const renderedShot = sShots.find((sh: any) => sh.renderUrl || sh.imageUrl || sh.previewUrl);
+                const matchingSceneNode = allNodes.find(n => n.type === 'sceneNode' && isSameScene(n.data?.sceneId || n.id, sId));
+                const sUrl = renderedShot 
+                  ? (renderedShot.renderUrl || renderedShot.imageUrl || renderedShot.previewUrl) 
+                  : (scene.renderUrl || scene.imageUrl || matchingSceneNode?.data?.renderUrl || matchingSceneNode?.data?.imageUrl || null);
 
                 return (
                   <div 
@@ -653,8 +677,8 @@ function ReviewBoardNode({ id, data }: any) {
                 const sData = sceneNode.data || {};
                 const vData = videoNode?.data || {};
                 
-                const sUrl = sData.renderUrl || sData.imageUrl;
-                const vUrl = vData.renderUrl || vData.videoUrl;
+                const sUrl = sData.renderUrl || sData.imageUrl || sData.previewUrl;
+                const vUrl = vData.renderUrl || vData.videoUrl || vData.renderVideoUrl || vData.video_url;
                 const shotKey = `${sceneNode.id}-${index}`;
                 
                 const variants = sData.variants || [];

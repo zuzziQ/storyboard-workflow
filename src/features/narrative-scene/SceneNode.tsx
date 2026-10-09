@@ -137,7 +137,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -178,7 +178,7 @@ const resolveReferencedAssetMedia = async (
    
    try {
       console.log(`[OrchestratorQuery] Querying DB for character ${characterId} with tag: ${tagId}...`);
-      const response = await fetch(`${baseUrl}/api/world-asset/orchestrator/query`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/query`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ characterId, tagId })
@@ -523,7 +523,7 @@ function MasterStoryboardNode({ id, data }: { id: string; data: any }) {
 
          linkedAssetIds.forEach(assetId => {
             const tagId = `scene_gen_${id.toLowerCase()}_${index}_${Date.now()}`;
-            fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+            fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
                method: 'POST',
                headers,
                body: JSON.stringify({
@@ -955,10 +955,14 @@ function SceneNode({ id, data }: any) {
     const activeSceneId = useFlowStore(s => s.activeSceneId);
     const isFocused = activeSceneId === sceneId;
 
+    const parsedData = useFlowStore(state => state.parsedData);
     const pendingShots = useFlowStore(state => state.pendingShots || []);
-    const sceneShots = pendingShots.filter((sh: any) => 
-      isSameScene(sh.sceneId || sh.sc || sh.scene_id, sceneId)
+    const allShots = pendingShots.length > 0 ? pendingShots : (parsedData?.shots || []);
+    const sceneShots = allShots.filter((sh: any) => 
+      isSameScene(sh.sceneId || sh.sc || sh.scene_id || (sh.sceneNumber ? `Scene-${sh.sceneNumber}` : ''), sceneId)
     );
+
+    const mainStoryboardImg = data.renderUrl || data.imageUrl || sceneShots.find((sh: any) => sh.renderUrl || sh.imageUrl || sh.previewUrl)?.renderUrl || sceneShots.find((sh: any) => sh.renderUrl || sh.imageUrl || sh.previewUrl)?.imageUrl || sceneShots.find((sh: any) => sh.renderUrl || sh.imageUrl || sh.previewUrl)?.previewUrl;
 
     let warningCount = 0;
     const warningList: string[] = [];
@@ -1015,6 +1019,26 @@ function SceneNode({ id, data }: any) {
           <span className="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-200 font-bold">{timeOfDay}</span>
         </div>
 
+        {/* Storyboard Visual Preview */}
+        {mainStoryboardImg && (
+          <div className="relative mb-3 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video group shadow-inner">
+            <img 
+              src={mainStoryboardImg} 
+              alt={`Storyboard ${sceneId}`} 
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+            />
+            <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1 shadow">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              STORYBOARD FRAME
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
+              <span className="text-[10px] text-white/90 font-medium line-clamp-1 italic">
+                {data.storyboardPrompt || description}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Description */}
         <div className="p-3 bg-slate-950/50 rounded-2xl border border-slate-900 text-[11px] text-slate-355 leading-relaxed max-h-24 overflow-y-auto italic custom-scrollbar">
           {description}
@@ -1058,11 +1082,55 @@ function SceneNode({ id, data }: any) {
           </div>
         )}
 
+        {/* Shot Strip Gallery */}
+        {sceneShots.length > 0 && (
+          <div className="mt-3 space-y-1.5 text-left">
+            <div className="flex items-center justify-between text-[9px] uppercase font-black text-slate-400 tracking-wider">
+              <span>SHOTS TRONG CẢNH ({sceneShots.length})</span>
+              <span className="text-emerald-400 font-mono">
+                {sceneShots.filter((s: any) => s.renderUrl || s.imageUrl || s.previewUrl).length}/{sceneShots.length} có ảnh
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 nodrag">
+              {sceneShots.map((sh: any, sIdx: number) => {
+                const shotImg = sh.renderUrl || sh.imageUrl || sh.previewUrl;
+                return (
+                  <div 
+                    key={sh.id || sh.beat || sIdx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveSceneId(sceneId);
+                      useFlowStore.getState().setIsRightDrawerCollapsed(false);
+                    }}
+                    className="group/thumb relative aspect-video rounded-xl overflow-hidden border border-slate-800 bg-slate-950/60 cursor-pointer hover:border-indigo-500 transition-all shadow-sm flex flex-col justify-end"
+                    title={sh.diễn_tả || sh.description || sh.beat || `Shot ${sIdx + 1}`}
+                  >
+                    {shotImg ? (
+                      <img src={shotImg} alt={sh.beat || `Shot ${sIdx + 1}`} className="w-full h-full object-cover absolute inset-0 group-hover/thumb:scale-110 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-700 absolute inset-0">
+                        <ImageIcon size={12} />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                    <div className="relative z-10 px-1 py-0.5 flex items-center justify-between text-[8px] font-bold text-white font-mono">
+                      <span className="bg-black/60 px-1 rounded text-[7px] text-indigo-300">#{sIdx + 1}</span>
+                      <span className="text-[7.5px] text-slate-300 truncate max-w-[45px]">{sh.cameraAngle || sh.framing || `${sh.duration || 3}s`}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Action Button: Open Right Drawer */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setActiveSceneId(isFocused ? 'all' : sceneId);
+            const willFocus = !isFocused;
+            setActiveSceneId(willFocus ? sceneId : 'all');
+            useFlowStore.getState().setIsRightDrawerCollapsed(!willFocus);
           }}
           className={`nodrag mt-3.5 w-full text-white text-[11px] font-black py-2.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 shadow-lg active:scale-95 border ${
             isFocused 

@@ -78,12 +78,12 @@ export const ShotPlanHeader: React.FC<ShotPlanHeaderProps> = ({
         </div>
       </div>
 
-      {/* Quick Action Controls & Progress Status Bar for Detailed Mode */}
-      {!isOverview && (
-        <div className="px-4 py-1 space-y-3">
-          {/* Top Line Action Buttons */}
-          <div className="flex items-center justify-between border-b border-indigo-500/10 pb-2">
-            <div className="flex items-center gap-2">
+      {/* Quick Action Controls & Progress Status Bar */}
+      <div className="px-4 py-1 space-y-3">
+        {/* Top Line Action Buttons */}
+        <div className="flex items-center justify-between border-b border-indigo-500/10 pb-2">
+          <div className="flex items-center gap-2">
+            {!isOverview && (
               <button
                 onClick={() => setActiveSceneId('all')}
                 className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
@@ -91,15 +91,17 @@ export const ShotPlanHeader: React.FC<ShotPlanHeaderProps> = ({
               >
                 <ArrowLeft size={14} />
               </button>
-              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
-                {activeSceneId}
-              </span>
-              <span className="text-xs font-bold text-white truncate max-w-[280px]">
-                📍 {activeScene?.location || 'Chưa đặt bối cảnh'}
-              </span>
-            </div>
+            )}
+            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
+              {isOverview ? 'TẤT CẢ CẢNH' : activeSceneId}
+            </span>
+            <span className="text-xs font-bold text-white truncate max-w-[280px]">
+              {isOverview ? `📍 Toàn bộ kịch bản (${scenes.length} cảnh • ${pendingShots.length} shots)` : `📍 ${activeScene?.location || 'Chưa đặt bối cảnh'}`}
+            </span>
+          </div>
 
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            {!isOverview && (
               <button
                 onClick={() => handleRegenerateSceneShots(activeScene)}
                 disabled={isRegenerating}
@@ -114,6 +116,7 @@ export const ShotPlanHeader: React.FC<ShotPlanHeaderProps> = ({
                   <>⚡ Sinh lại Storyboard Cảnh Này</>
                 )}
               </button>
+            )}
               <button
                 onClick={handleAiAnalyzeShots}
                 disabled={isAnalyzingAi}
@@ -200,9 +203,8 @@ export const ShotPlanHeader: React.FC<ShotPlanHeaderProps> = ({
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
 };
 
 export default ShotPlanHeader;

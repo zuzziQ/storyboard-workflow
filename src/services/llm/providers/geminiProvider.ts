@@ -12,7 +12,7 @@ export class GeminiProvider implements LlmProvider {
   ): Promise<string> {
     const hubToken = settings.hubApiKey || import.meta.env.VITE_HUB_API_KEY || "";
     const hubUrl = settings.hubUrl ? settings.hubUrl.replace(/\/$/, '') : getApiBaseUrl();
-    const HUB_API_URL = `${hubUrl}/api/media/prompt`;
+    const HUB_API_URL = `${hubUrl}/v1/media/prompt`;
     const model = settings.googleLlmModel || 'gemini-2.5-flash';
 
     console.log(`[GeminiProvider] Routing call via Gemini Proxy: ${HUB_API_URL}`);

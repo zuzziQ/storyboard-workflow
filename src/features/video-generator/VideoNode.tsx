@@ -544,34 +544,7 @@ function VideoNode({ id, data }: any) {
 
       mediaIds = Array.from(new Set(mediaIds));
 
-      let finalPrompt = data.videoPrompt || "";
-      if (sceneNode) {
-         const allNodes = getNodes();
-         const worldAssetNode = allNodes.find(n => n.type === 'worldAssetNode');
-         const allCharacters = worldAssetNode ? (worldAssetNode.data.characters || []) : [];
-         const charactersInScene: string[] = sceneNode.data.charactersInScene || [];
-         const promptText = (sceneNode.data.storyboardPrompt || sceneNode.data.physicalCharacteristics || "").toLowerCase();
-
-         const missingNames: string[] = [];
-         allCharacters.forEach((char: any) => {
-            const name = char.name || "";
-            
-             const isMatchedChar = charactersInScene.some((cName: string) => {
-                return safeMatchName(cName, name, char.aliases) || safeMatchName(name, cName, char.aliases);
-             });
-             
-              if (isMatchedChar || safeMatchName(promptText, name, char.aliases)) {
-                 const resolvedMedia = char.mediaId || (useRemote ? (char.imageUrl || char.rootImageUrl) : null);
-                 if (resolvedMedia && !finalPrompt.toLowerCase().includes(name.toLowerCase())) {
-                    missingNames.push(char.name);
-                 }
-             }
-         });
-
-         if (missingNames.length > 0) {
-            finalPrompt += `\n**CHARACTER REFERENCES:** Ensure consistent appearance for: ${missingNames.join(', ')}.`;
-         }
-      }
+      const finalPrompt = data.videoPrompt || "";
 
       const payload = {
         prompt: finalPrompt,

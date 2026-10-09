@@ -118,6 +118,58 @@ async function fetchWithRetry(url: string, options?: RequestInit & { timeoutMs?:
 }
 
 /**
+ * Uploads a reference image to World Asset API
+ */
+export async function uploadReferenceImage(
+  fileOrBlob: Blob | File | string,
+  filename = 'reference_image.jpg'
+): Promise<string | null> {
+  const baseUrl = getApiBaseUrl();
+  const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
+  
+  try {
+    let blob: Blob;
+    if (typeof fileOrBlob === 'string') {
+      if (fileOrBlob.startsWith('data:image/')) {
+        const parts = fileOrBlob.split(';base64,');
+        const contentType = parts[0].split(':')[1];
+        const raw = window.atob(parts[1]);
+        const rawLength = raw.length;
+        const uInt8Array = new Uint8Array(rawLength);
+        for (let i = 0; i < rawLength; ++i) {
+          uInt8Array[i] = raw.charCodeAt(i);
+        }
+        blob = new Blob([uInt8Array], { type: contentType });
+      } else {
+        return fileOrBlob;
+      }
+    } else {
+      blob = fileOrBlob;
+    }
+
+    const formData = new FormData();
+    formData.append('file', blob, filename);
+
+    const headers: any = {};
+    if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
+
+    const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
+      method: 'POST',
+      headers,
+      body: formData
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data.url || data.data?.url || null;
+    }
+  } catch (err) {
+    console.error('[MediaGateway] uploadReferenceImage error:', err);
+  }
+  return null;
+}
+
+/**
  * Polls the job status from StoryMee core-api
  */
 async function pollHubJobStatus(
@@ -141,17 +193,30 @@ async function pollHubJobStatus(
       const headers: any = {};
       if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-      // Use a single fetch with a 10s timeout, bypassing fetchWithRetry to prevent blocking
-      const res = await fetchWithTimeout(`${baseUrl}/api/media/status/${jobId}`, { headers, timeout: 10000 });
-      if (!res.ok) {
-        if (res.status === 403 || res.status === 401) {
-          return { success: false, error: `Lỗi xác thực (Status ${res.status}). Vui lòng kiểm tra lại API Key.` };
-        }
-        continue;
-      }
+      let job: any = null;
 
-      const data = await res.json();
-      const job = data.data;
+      // 1. Thử endpoint chuẩn của core-job-api: /internal/v1/jobs/${jobId}
+      let res = await fetchWithTimeout(`${baseUrl}/internal/v1/jobs/${jobId}`, { headers, timeout: 10000 });
+      if (res.ok) {
+        const data = await res.json();
+        job = data.data || data.job || data;
+      } else if (res.status === 401 || res.status === 403) {
+        return { success: false, error: `Lỗi xác thực (Status ${res.status}). Vui lòng kiểm tra lại API Key.` };
+      } else {
+        // Fallback 1: /v1/media/tasks/${jobId}
+        res = await fetchWithTimeout(`${baseUrl}/v1/media/tasks/${jobId}`, { headers, timeout: 10000 });
+        if (res.ok) {
+          const data = await res.json();
+          job = data.data || data.task || data;
+        } else {
+          // Fallback 2: /v1/jobs/${jobId}/status
+          res = await fetchWithTimeout(`${baseUrl}/v1/jobs/${jobId}/status`, { headers, timeout: 10000 });
+          if (res.ok) {
+            const data = await res.json();
+            job = data.data || data;
+          }
+        }
+      }
 
       if (!job) continue;
 
@@ -167,10 +232,11 @@ async function pollHubJobStatus(
         }
       }
 
-      const status = String(job.status).toUpperCase();
+      const status = String(job.status || '').toUpperCase();
       if (status === 'COMPLETED' || status === 'DONE' || status === 'SUCCESS') {
-        const outputUrls = job.outputUrls || [];
-        const rawOutput = job.output_url || job.outputUrl || (outputUrls.length > 0 ? outputUrls[0] : null);
+        const outputUrls = job.outputUrls || job.output_urls || [];
+        const resultUrl = typeof job.result === 'string' ? job.result : (job.result?.url || job.result?.outputUrl || (Array.isArray(job.result) ? job.result[0] : null));
+        const rawOutput = job.output_url || job.outputUrl || (outputUrls.length > 0 ? outputUrls[0] : null) || resultUrl;
         if (rawOutput) {
           const firstUrl = typeof rawOutput === 'string' ? rawOutput : (Array.isArray(rawOutput) ? rawOutput[0] : String(rawOutput));
           return {
@@ -183,7 +249,8 @@ async function pollHubJobStatus(
       }
 
       if (status === 'FAILED' || status === 'ERROR') {
-        let errorMsg = job.errorMessage || "Cloud worker task failed.";
+        let errorMsg = job.errorMessage || job.error || (typeof job.result?.error === 'string' ? job.result.error : "Cloud worker task failed.");
+        if (typeof errorMsg === 'object') errorMsg = JSON.stringify(errorMsg);
         if (errorMsg.includes("reCAPTCHA") || errorMsg.includes("403")) {
           errorMsg = `Lỗi xác thực Google reCAPTCHA (PERMISSION_DENIED: PUBLIC_ERROR_UNUSUAL_ACTIVITY). Hãy đổi IP VPS hoặc thử sinh lại.`;
         }
@@ -298,7 +365,7 @@ export async function generateMediaViaGateway(
 
     try {
       const baseUrl = settings.hubUrl ? settings.hubUrl.replace(/\/$/, '') : getApiBaseUrl();
-      const endpoint = payload.mediaType === 'video' ? `${baseUrl}/api/media/video` : `${baseUrl}/api/media/image`;
+      const endpoint = payload.mediaType === 'video' ? `${baseUrl}/v1/media/video` : `${baseUrl}/v1/media/image`;
       
       const durationSeconds = payload.duration ? parseInt(payload.duration.replace('s', '')) : (payload.mediaType === 'video' ? 5 : 0);
 
@@ -375,7 +442,7 @@ export async function generateMediaViaGateway(
 
   try {
     const baseUrl = settings.hubUrl ? settings.hubUrl.replace(/\/$/, '') : getApiBaseUrl();
-    const endpoint = payload.mediaType === 'video' ? `${baseUrl}/api/media/video` : `${baseUrl}/api/media/image`;
+    const endpoint = payload.mediaType === 'video' ? `${baseUrl}/v1/media/video` : `${baseUrl}/v1/media/image`;
     
     const durationSeconds = payload.duration ? parseInt(payload.duration.replace('s', '')) : (payload.mediaType === 'video' ? 5 : 0);
 

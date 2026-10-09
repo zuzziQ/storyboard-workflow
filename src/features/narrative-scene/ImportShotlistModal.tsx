@@ -40,7 +40,7 @@ export default function ImportShotlistModal({ isOpen, onClose }: ImportShotlistM
       try {
         const baseUrl = getApiBaseUrl();
         const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-        const res = await fetch(`${baseUrl}/api/world-asset/projects`, {
+        const res = await fetch(`${baseUrl}/internal/v1/asset/world/projects`, {
           headers: {
             'Authorization': `Bearer ${HUB_API_KEY}`
           }
@@ -138,7 +138,7 @@ export default function ImportShotlistModal({ isOpen, onClose }: ImportShotlistM
     }
 
     try {
-      const res = await fetch(`${baseUrl}/api/world-asset/episodes/import-shotlist`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/episodes/import-shotlist`, {
         method: 'POST',
         headers,
         body: formData

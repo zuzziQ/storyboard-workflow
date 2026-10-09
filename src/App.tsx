@@ -7,7 +7,7 @@ import ReactFlow, {
 } from 'reactflow';
 import type { NodeTypes, DefaultEdgeOptions } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Download, Upload, Play, FileText, Cpu, Wifi, ChevronDown, Check, Loader2, Film, Zap, Brain, Sparkles, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { Download, Upload, Play, FileText, Cpu, Wifi, ChevronDown, Check, Loader2, Film, Zap, Brain, Sparkles, ChevronLeft, ChevronRight, Settings, X } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 
 import { registryNodeTypes, flowRegistry } from './features/registry';
@@ -27,6 +27,7 @@ import ShotPlanNode from './features/shot-plan/ShotPlanNode';
 import CanvasSidebarWrapper from './components/CanvasSidebarWrapper';
 import { generateMediaViaGateway } from './utils/mediaGateway';
 import { getApiBaseUrl } from './utils/apiConfig';
+import { PACO_DEMO_PROJECT } from './demo/pacoDemoProject';
 
 const nodeTypes: NodeTypes = registryNodeTypes as any;
 
@@ -163,7 +164,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -205,7 +206,7 @@ const resolveReferencedAssetMedia = async (
    
    try {
       console.log(`[OrchestratorQuery] Querying DB for character ${characterId} with tag: ${tagId}...`);
-      const response = await fetch(`${baseUrl}/api/world-asset/orchestrator/query`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/query`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ characterId, tagId })
@@ -432,7 +433,7 @@ function App() {
          linkedEntities.forEach(ent => {
             if (ent.role === 'character') {
                const tagId = `shot_gen_${shotIdVal.toLowerCase()}_${Date.now()}`;
-               fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+               fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
                   method: 'POST',
                   headers,
                   body: JSON.stringify({
@@ -646,12 +647,23 @@ function App() {
     const checkExt = () => {
       if ((window as any).chrome?.runtime && extId) {
         try {
-          (window as any).chrome.runtime.sendMessage(extId, { action: "GET_GOOGLE_LABS_TOKEN" }, () => {
+          (window as any).chrome.runtime.sendMessage(extId, { action: "PING" }, (res: any) => {
             const lastErr = (window as any).chrome.runtime.lastError;
-            if (lastErr) {
-              setIsExtConnected(false);
-            } else {
+            if (!lastErr && (res?.status === "PONG" || res)) {
               setIsExtConnected(true);
+            } else {
+              try {
+                (window as any).chrome.runtime.sendMessage(extId, { action: "GET_GOOGLE_LABS_TOKEN" }, () => {
+                  const fallbackErr = (window as any).chrome.runtime.lastError;
+                  if (fallbackErr) {
+                    setIsExtConnected(false);
+                  } else {
+                    setIsExtConnected(true);
+                  }
+                });
+              } catch {
+                setIsExtConnected(false);
+              }
             }
           });
         } catch (e) {
@@ -856,7 +868,7 @@ function App() {
   
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
-  const { setReactFlowInstance, onDragStart, onDragOver, onDrop } = useDnD();
+  const { reactFlowInstance, setReactFlowInstance, onDragStart, onDragOver, onDrop } = useDnD();
   const { handleExport, handleImport } = useProjectStorage();
   const { handleAnalyze, handleBuildStoryboard, isBuildingStoryboard, buildingStage, handleImportEpisode, isAnalyzingEmotion, handleAnalyzeImportedScriptEmotion, handleRefreshAssets } = useGraphBuilder();
 
@@ -881,8 +893,38 @@ function App() {
     }
   }, []);
 
+  const handleLoadDemoProject = () => {
+    const store = useFlowStore.getState();
+    store.setNodes(PACO_DEMO_PROJECT.nodes);
+    store.setEdges(PACO_DEMO_PROJECT.edges);
+    store.setParsedData(PACO_DEMO_PROJECT.parsedData);
+    store.setPendingShots(PACO_DEMO_PROJECT.parsedData.shots || []);
+    store.setProjectData(PACO_DEMO_PROJECT.projectData);
+    store.setActiveSceneId('all');
+    store.setIsDrawerOpen(false);
+    store.setIsRightDrawerCollapsed(false);
+    setTimeout(() => {
+      reactFlowInstance?.fitView({ padding: 0.15, duration: 600 });
+    }, 200);
+  };
+
+  // Auto-seed Paco Showcase Demo if canvas is empty or demo project is missing pending shots
+  useEffect(() => {
+    const store = useFlowStore.getState();
+    const isDemo = store.projectData?.id === 'paco-showcase-demo';
+    const hasNoNodes = !store.nodes || store.nodes.length === 0;
+    const hasNoShots = !store.pendingShots || store.pendingShots.length === 0;
+    const scene1Node = store.nodes?.find(n => n.id === 'scene-1');
+    const demoNeedsUpgrade = isDemo && (!scene1Node?.data?.renderUrl || hasNoShots);
+
+    if (hasNoNodes || demoNeedsUpgrade) {
+      console.log("[App] Auto-seeding Paco Showcase Demo Project for visitors...");
+      handleLoadDemoProject();
+    }
+  }, []);
+
   const triggerAutoGFlow = () => {
-    alert("🚀 TÍNH NĂNG CHẠY TỰ ĐỘNG ĐÃ BỊ TẮT!\n\nTheo kiến trúc mới, vui lòng bấm chạy thủ công trên từng Node (Project Init -> Assets -> Upload Media -> Scene Gen) để kiểm soát dữ liệu chính xác nhất!");
+    alert("🚀 TÍNH NĂNG CHẠY TỰ ĐỘNG ĐÃ BỊ TẮT!\n\nTheo kiến trúc mới, vui lòng bấm chạy thủ công trên từng Node để kiểm soát dữ liệu chính xác nhất!");
   };
 
   const handleExportScript = () => {
@@ -952,26 +994,30 @@ function App() {
     const nextNodes = currentNodes.map(node => {
       // 1. World Asset Node
       if (node.type === 'worldAssetNode') {
-        return { ...node, position: { x: 100, y: 50 } };
+        return { ...node, position: { x: 50, y: 50 } };
       }
       // 2. Emotion Arc Node
       if (node.type === 'emotionArcNode') {
-        return { ...node, position: { x: 100, y: 750 } };
+        return { ...node, position: { x: 50, y: 720 } };
       }
-      // 3. Narrative Scene Nodes
+      // 3. Narrative Scene Nodes (placed side-by-side in pipeline)
       if (node.type === 'sceneNode') {
         const sceneIndex = sortedScenes.findIndex(s => s.id === node.id);
         const idx = sceneIndex !== -1 ? sceneIndex : 0;
-        return { ...node, position: { x: 100 + idx * 390, y: 1100 } };
+        return { ...node, position: { x: 620 + idx * 400, y: 50 } };
       }
       // 4. Review Board Node
       if (node.type === 'reviewBoardNode') {
-        return { ...node, position: { x: 100, y: 2100 } };
+        const xPos = 620 + Math.max(sortedScenes.length, 1) * 400;
+        return { ...node, position: { x: xPos, y: 50 } };
       }
       return node;
     });
 
     useFlowStore.getState().setNodes(nextNodes);
+    setTimeout(() => {
+      reactFlowInstance?.fitView({ padding: 0.15, duration: 600 });
+    }, 100);
   };
 
   return (
@@ -1005,8 +1051,8 @@ function App() {
                     </button>
                  )}
                </div>
-               <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20 font-bold uppercase tracking-wider">
-                 Layout: {buildMode === 'consolidated' ? 'Consolidated' : '1x1 Columns'}
+               <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20 font-bold uppercase tracking-wider">
+                 Pipeline Flow
                </span>
             </div>
           </div>
@@ -1047,6 +1093,35 @@ function App() {
               )}
             </button>
           )}
+
+          <button 
+            onClick={handleLoadDemoProject}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:via-pink-500 hover:to-indigo-500 text-white px-3.5 py-2 rounded-lg font-bold text-xs transition-all shadow-lg shadow-purple-500/25 active:scale-95 cursor-pointer border border-purple-400/40"
+            title="Tải ngay dự án mẫu Paco hoàn chỉnh để người xem portfolio trải nghiệm toàn bộ hệ thống"
+          >
+            <Sparkles size={14} className="text-yellow-300 animate-spin" style={{ animationDuration: '3s' }} />
+            <span>✨ Demo Showcase</span>
+          </button>
+
+          {/* Export / Import Project File (.storymee) */}
+          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg overflow-hidden shadow-sm">
+            <button
+              onClick={handleExport}
+              className="px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+              title="Xuất dự án ra file .storymee để lưu hoặc chia sẻ"
+            >
+              <Download size={13} />
+              <span>Lưu</span>
+            </button>
+            <label
+              className="px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all border-l border-slate-800"
+              title="Nhập file .storymee từ máy tính"
+            >
+              <Upload size={13} />
+              <span>Nạp</span>
+              <input type="file" accept=".storymee,.json" onChange={handleImport} className="hidden" />
+            </label>
+          </div>
 
           <button 
             onClick={handleAutoLayout}
@@ -1172,9 +1247,17 @@ function App() {
               </div>
             )}
           </div>
-          <button onClick={triggerAutoGFlow} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-400 px-6 py-2 rounded-lg font-bold text-sm transition-all border border-slate-700">
-            <Play size={16} fill="currentColor" />
-            Auto Render (Disabled)
+          <button 
+            onClick={() => useFlowStore.getState().setIsRightDrawerCollapsed(!isRightDrawerCollapsed)} 
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all border cursor-pointer active:scale-95 ${
+              !isRightDrawerCollapsed 
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-400/60 shadow-lg shadow-indigo-500/25' 
+                : 'bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700'
+            }`}
+            title="Mở hoặc thu gọn bảng chi tiết Shot (Shot Plan Drawer)"
+          >
+            <Film size={15} />
+            <span>🎬 Bảng Shot</span>
           </button>
         </div>
       </header>
@@ -1189,27 +1272,46 @@ function App() {
 
             {/* Floating Drawer (Script Editor & Asset Manager) */}
             <div 
-              className={`absolute left-24 top-6 bottom-6 rounded-2xl z-20 flex bg-slate-900 shadow-[10px_0_30px_rgba(0,0,0,0.8)] transition-all duration-300 ease-in-out border border-slate-700 overflow-hidden ${isDrawerOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}`}
+              className={`absolute left-24 top-6 bottom-6 max-w-[calc(100vw-120px)] rounded-2xl z-40 flex flex-col bg-[#111118]/95 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] transition-all duration-300 ease-in-out border border-slate-700/80 overflow-hidden ${isDrawerOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none'}`}
             >
-              <ScriptEditor 
-                onAnalyze={handleAnalyze} 
-                isLoading={isAnalyzing} 
-                externalScript={parsedData?.scriptText} 
-                onImportEpisode={handleImportEpisode}
-                onBuildStoryboard={handleBuildStoryboard}
-              />
-              <AssetManager 
-                parsedData={parsedData} 
-                onBuildStoryboard={handleBuildStoryboard} 
-                isBuilding={isBuildingStoryboard}
-                buildingStage={buildingStage}
-              />
+              {/* Drawer Top Header with Title and Explicit Close Button */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-[#161622]/90 select-none">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
+                  <span className="text-xs font-black text-white uppercase tracking-wider">Kịch Bản & Quản Lý Tài Sản (Script & Assets)</span>
+                </div>
+                <button
+                  onClick={() => useFlowStore.getState().setIsDrawerOpen(false)}
+                  className="p-1 px-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-600/80 text-slate-400 hover:text-white transition-all cursor-pointer border border-slate-700/50 flex items-center gap-1.5 text-xs font-bold"
+                  title="Đóng bảng kịch bản"
+                >
+                  <X size={14} />
+                  <span>Đóng</span>
+                </button>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 flex overflow-hidden">
+                <ScriptEditor 
+                  onAnalyze={handleAnalyze} 
+                  isLoading={isAnalyzing} 
+                  externalScript={parsedData?.scriptText} 
+                  onImportEpisode={handleImportEpisode}
+                  onBuildStoryboard={handleBuildStoryboard}
+                />
+                <AssetManager 
+                  parsedData={parsedData} 
+                  onBuildStoryboard={handleBuildStoryboard} 
+                  isBuilding={isBuildingStoryboard}
+                  buildingStage={buildingStage}
+                />
+              </div>
             </div>
 
             {/* React Flow Canvas (Main Workspace) */}
             <div 
               className={`flex-1 relative reactflow-wrapper z-10 flex flex-col transition-all duration-300 ease-in-out ${
-                (activeSceneId !== 'all' && !isRightDrawerCollapsed) ? 'pr-[55vw] min-[1364px]:pr-[min(55vw,1100px)] min-[1000px]:pr-[750px]' : ''
+                (!isRightDrawerCollapsed) ? 'pr-[55vw] min-[1364px]:pr-[min(55vw,1050px)] min-[1000px]:pr-[650px]' : ''
               }`}
               ref={reactFlowWrapper}
             >
@@ -1250,6 +1352,32 @@ function App() {
                       </button>
                     );
                   })}
+                </div>
+              )}
+
+              {filteredNodes.length === 0 && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none p-4">
+                  <div className="bg-slate-900/95 backdrop-blur-2xl border border-indigo-500/30 rounded-2xl p-8 max-w-md text-center shadow-2xl pointer-events-auto space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-16 h-16 bg-gradient-to-tr from-purple-500 via-pink-500 to-indigo-500 rounded-2xl mx-auto flex items-center justify-center shadow-xl shadow-purple-500/30">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white tracking-wide">Trải Nghiệm Flow Architect</h3>
+                      <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                        Hệ thống tự động hóa kịch bản thành Storyboard, World Asset DNA và phân rã Shot hình điện ảnh.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2.5 pt-2">
+                      <button
+                        onClick={handleLoadDemoProject}
+                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:via-pink-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xl shadow-purple-500/30 active:scale-95 cursor-pointer border border-purple-400/40"
+                      >
+                        <Sparkles size={14} className="text-yellow-300" />
+                        <span>Tải Dự Án Mẫu (Demo Showcase)</span>
+                      </button>
+                      <span className="text-[10px] text-slate-500">Hoặc mở Drawer góc trái để viết kịch bản từ đầu</span>
+                    </div>
+                  </div>
                 </div>
               )}
 

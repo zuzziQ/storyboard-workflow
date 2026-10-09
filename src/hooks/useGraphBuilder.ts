@@ -58,7 +58,7 @@ export function useGraphBuilder() {
         try {
           const baseUrl = getApiBaseUrl();
           const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-          const res = await fetchWithTimeout(`${baseUrl}/api/world-asset/characters?projectId=${activeUniverseId}`, { 
+          const res = await fetchWithTimeout(`${baseUrl}/internal/v1/asset/world/characters?projectId=${activeUniverseId}`, { 
             timeout: 4000,
             headers: {
               'Authorization': `Bearer ${HUB_API_KEY}`
@@ -144,7 +144,7 @@ export function useGraphBuilder() {
       try {
         const baseUrl = getApiBaseUrl();
         const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-        const res = await fetchWithTimeout(`${baseUrl}/api/world-asset/characters?projectId=${activeUniverseId}`, { 
+        const res = await fetchWithTimeout(`${baseUrl}/internal/v1/asset/world/characters?projectId=${activeUniverseId}`, { 
           timeout: 4000,
           headers: {
             'Authorization': `Bearer ${HUB_API_KEY}`
@@ -757,7 +757,7 @@ export function useGraphBuilder() {
       try {
         const baseUrl = getApiBaseUrl();
         const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-        const charRes = await fetch(`${baseUrl}/api/world-asset/characters?projectId=${activeProjId}`, {
+        const charRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters?projectId=${activeProjId}`, {
           headers: { 'Authorization': `Bearer ${HUB_API_KEY}` }
         });
         if (charRes.ok) {
@@ -1063,7 +1063,7 @@ export function useGraphBuilder() {
         try {
           const baseUrl = getApiBaseUrl();
           const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-          const res = await fetch(`${baseUrl}/api/world-asset/characters?projectId=${activeUniverseId}`, {
+          const res = await fetch(`${baseUrl}/internal/v1/asset/world/characters?projectId=${activeUniverseId}`, {
             headers: { 'Authorization': `Bearer ${HUB_API_KEY}` }
           });
           if (res.ok) {
@@ -1484,7 +1484,7 @@ export function useGraphBuilder() {
       const baseUrl = getApiBaseUrl();
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/characters?projectId=${activeProjId}`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/characters?projectId=${activeProjId}`, {
         headers: { 'Authorization': `Bearer ${HUB_API_KEY}` }
       });
       if (!res.ok) throw new Error("Không thể tải danh sách Asset từ World DB");

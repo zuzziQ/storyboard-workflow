@@ -12,7 +12,7 @@ export class HubProvider implements LlmProvider {
   ): Promise<string> {
     const hubToken = settings.hubApiKey || import.meta.env.VITE_HUB_API_KEY || "";
     const hubUrl = settings.hubUrl ? settings.hubUrl.replace(/\/$/, '') : getApiBaseUrl();
-    const HUB_API_URL = `${hubUrl}/api/media/prompt`;
+    const HUB_API_URL = `${hubUrl}/v1/media/prompt`;
     const model = settings.hubLlmModel || 'gpt-5.4-mini';
 
     console.log(`[HubProvider] Routing call via Hub Proxy: ${HUB_API_URL}`);

@@ -87,7 +87,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -150,7 +150,7 @@ const resolveReferencedAssetMedia = async (
    
    try {
       console.log(`[OrchestratorQuery] Querying DB for character ${characterId} with tag: ${tagId}...`);
-      const response = await fetch(`${baseUrl}/api/world-asset/orchestrator/query`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/query`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ characterId, tagId })
@@ -478,7 +478,7 @@ export default function ShotPlanTable({ onBuild }: { onBuild: (assetImages: Reco
       ).filter(Boolean);
       const shotType = sh.cameraSize || sh.shotType || 'medium';
 
-      const res = await fetch(`${baseUrl}/world-asset/projects/${projectId}/auto-layout`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/projects/${projectId}/auto-layout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, characters: charRefs, shotType })
@@ -502,7 +502,7 @@ export default function ShotPlanTable({ onBuild }: { onBuild: (assetImages: Reco
       
       // Đồng bộ cơ sở dữ liệu backend
       const updatedFields = { renderUrl: compositeBase64, imageUrl: compositeBase64 };
-      const resUpdate = await fetch(`${baseUrl}/world-asset/projects/${projectId}/shots/${currentShotId}`, {
+      const resUpdate = await fetch(`${baseUrl}/internal/v1/asset/world/projects/${projectId}/shots/${currentShotId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFields)
@@ -906,7 +906,7 @@ Lưu ý: Chỉ xuất ra JSON hợp lệ nằm trong khối block code json. Kh�
       const userPrompt = `Hãy phân tích và map chính xác các shot sau:
 ${JSON.stringify(shotsPayload, null, 2)}`;
 
-      const HUB_API_URL = `${baseUrl}/api/media/prompt`;
+      const HUB_API_URL = `${baseUrl}/v1/media/prompt`;
       
       const response = await fetch(HUB_API_URL, {
         method: 'POST',
@@ -1365,7 +1365,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
            linkedEntities.forEach(ent => {
               if (ent.role === 'character') {
                  const tagId = `shot_gen_${beatId.toLowerCase()}_${Date.now()}`;
-                 fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+                 fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({

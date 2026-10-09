@@ -1,0 +1,583 @@
+{
+  "projectData": {
+    "id": "paco-showcase-demo",
+    "name": "Paco & Cỗ Máy Thời Gian (Showcase Demo)",
+    "stylePrompt": "Cinematic lighting, hyperrealistic, 8k resolution, unreal engine 5 render, concept art, Pixar & Makoto Shinkai hybrid aesthetics",
+    "selectedUniverseId": "paco-universe-01",
+    "selectedProjectId": "paco-universe-01",
+    "aspectRatio": "16:9",
+    "dialogueMode": "post-sync",
+    "targetRuntime": 120,
+    "maxShotCount": 30,
+    "imageModel": "auto",
+    "videoModel": "auto",
+    "safetyLocks": [
+      "no-text",
+      "no-subtitles",
+      "no-morphing"
+    ],
+    "universeGenre": "Khoa học viễn tưởng / Phiêu lưu thiếu nhi",
+    "worldConstraints": "Bối cảnh thế giới công nghệ tương lai ấm áp, nhân vật có trang phục và phụ kiện nhận diện cố định",
+    "shotlistPreset": "universal_cinematic"
+  },
+  "parsedData": {
+    "scriptText": "CẢNH 1: PHÒNG KHÁCH NHÀ PACO - NGÀY\n\nPaco cặm cụi gắn vi mạch lượng tử Quantum Core vào ngực chú robot mèo AIKI trên bàn gỗ.\n(Cảm xúc: hào hứng, tập trung)\n\nPACO\n(cười rạng rỡ)\nMảnh ghép cuối cùng đây rồi! Chuẩn bị khởi động thôi!\n\nBất ngờ, một tiếng động lạ phát ra từ ngăn kéo bàn làm việc.\n\nCẢNH 2: XƯỞNG SÁNG CHẾ BÍ MẬT - ĐÊM\n\nTừ ngăn kéo phát ra ánh sáng tím, robot mèo AIKI bay lơ lửng, chớp mắt hai vòng tròn vàng và cất tiếng chào.",
+    "characters": [
+      {
+        "name": "Paco",
+        "description": "Cậu bé sáng chế 10 tuổi, tóc nâu xoăn nhẹ, đeo kính bảo hộ công nghệ viền cam, mặc áo hoodie xanh coban và găng tay thợ máy.",
+        "aliases": [
+          "Paco",
+          "Cậu bé Paco",
+          "Cậu bé"
+        ]
+      },
+      {
+        "name": "AIKI",
+        "description": "Chú mèo robot AI bay lơ lửng, lớp vỏ hợp kim trắng titan bóng loáng, đôi tai cơ khí phát sáng xanh neon, màn hình mắt hiển thị cảm xúc linh hoạt.",
+        "aliases": [
+          "AIKI",
+          "Robot AIKI",
+          "Mèo máy"
+        ]
+      }
+    ],
+    "locations": [
+      {
+        "name": "Phòng Khách Paco",
+        "description": "Căn phòng khách ấm áp ngập tràn ánh nắng buổi chiều, nhiều kệ sách và bản thiết kế kỹ thuật, bàn làm việc bằng gỗ sồi chứa đầy linh kiện điện tử.",
+        "aliases": [
+          "Phòng khách",
+          "Phòng làm việc"
+        ]
+      },
+      {
+        "name": "Xưởng Sáng Chế Bí Mật",
+        "description": "Xưởng chế tạo công nghệ cao ngầm dưới lòng đất, các màn hình hiển thị dữ liệu 3D holographic, ánh sáng xanh tím phong cách Cyberpunk Sci-Fi tương lai.",
+        "aliases": [
+          "Xưởng sáng chế",
+          "Phòng thí nghiệm"
+        ]
+      }
+    ],
+    "props": [
+      {
+        "name": "Quantum Core",
+        "description": "Vi mạch năng lượng lượng tử hình lục giác phát sáng hào quang lam ngọc, chứa nguồn năng lượng vô tận cho cỗ máy thời gian.",
+        "aliases": [
+          "Lõi năng lượng",
+          "Quantum Core",
+          "Vi mạch"
+        ]
+      }
+    ],
+    "scenes": [
+      {
+        "id": "Scene-1",
+        "sceneId": "Scene-1",
+        "location": "Phòng Khách Paco",
+        "timeOfDay": "DAY",
+        "action": "Paco cặm cụi gắn vi mạch lượng tử Quantum Core vào ngực chú robot mèo AIKI trên bàn gỗ.",
+        "charactersInScene": [
+          "Paco"
+        ],
+        "props": [
+          "Quantum Core"
+        ],
+        "emotionIntensity": 45,
+        "valence": "positive",
+        "arcPosition": "setup",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "storyboardPrompt": "Warm cinematic shot of Paco, 10-year-old boy in cobalt hoodie and tech goggles, carefully soldering glowing cyan quantum microchip on wooden workshop table. Sunbeams streaming through window, dust motes floating in air, shallow depth of field, 8k, Unreal Engine 5 render."
+      },
+      {
+        "id": "Scene-2",
+        "sceneId": "Scene-2",
+        "location": "Xưởng Sáng Chế Bí Mật",
+        "timeOfDay": "NIGHT",
+        "action": "Từ ngăn kéo phát ra ánh sáng tím, robot mèo AIKI bay lơ lửng, chớp mắt hai vòng tròn vàng và cất tiếng chào.",
+        "charactersInScene": [
+          "Paco",
+          "AIKI"
+        ],
+        "props": [],
+        "emotionIntensity": 85,
+        "valence": "neutral",
+        "arcPosition": "inciting",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "storyboardPrompt": "Dark atmospheric sci-fi scene: A sleek white robotic cat with glowing cyan ears and amber circular digital eyes levitating inside high-tech underground laboratory. Neon accents, holographic diagrams, volumetric smoke, 8k resolution."
+      }
+    ],
+    "emotionArc": [
+      {
+        "sceneId": "Scene 1",
+        "intensity": 45,
+        "valence": "positive",
+        "emotion": "Tập trung & Hào hứng",
+        "arcPosition": "setup",
+        "lighting": "Warm Golden Hour Sunlight",
+        "weather": "Clear afternoon",
+        "soundCue": "Ticking clock, mechanical clicks"
+      },
+      {
+        "sceneId": "Scene 2",
+        "intensity": 85,
+        "valence": "neutral",
+        "emotion": "Bất ngờ & Hồi hộp",
+        "arcPosition": "inciting",
+        "lighting": "Deep Blue with Neon Cyan Glow",
+        "weather": "Indoor energy surge",
+        "soundCue": "Low electronic hum, metallic resonance"
+      }
+    ],
+    "shots": [
+      {
+        "id": "SC01_B01",
+        "beat": "SC01_B01",
+        "sc": "SC01",
+        "shotId": "Shot-1.1",
+        "shotNumber": 1,
+        "sceneId": "Scene-1",
+        "sceneNumber": 1,
+        "cameraAngle": "wide_shot",
+        "framing": "Wide Shot",
+        "angle": "Eye-Level",
+        "cameraMovement": "Slow Dolly In",
+        "camera_movement": "Slow Dolly In",
+        "lens": "35mm Anamorphic",
+        "description": "Toàn cảnh phòng khách ấm áp, ánh chiều tà chiếu qua cửa sổ lớn. Paco đang ngồi cặm cụi bên bàn làm việc đầy bản vẽ và linh kiện cơ khí.",
+        "diễn_tả": "Toàn cảnh phòng khách ấm áp, ánh chiều tà chiếu qua cửa sổ lớn. Paco đang ngồi cặm cụi bên bàn làm việc đầy bản vẽ và linh kiện cơ khí.",
+        "prompt": "Cinematic wide establishing shot: Paco, a 10-year-old boy in cobalt hoodie and tech goggles, sitting at a wooden workbench cluttered with robot parts and blueprints. Warm afternoon sun rays streaming through large window, cozy living room interior, cinematic 16:9, hyperrealistic, 8k.",
+        "visual": "Cinematic wide establishing shot: Paco, a 10-year-old boy in cobalt hoodie and tech goggles, sitting at a wooden workbench cluttered with robot parts and blueprints. Warm afternoon sun rays streaming through large window, cozy living room interior, cinematic 16:9, hyperrealistic, 8k.",
+        "storyboardPrompt": "Cinematic wide establishing shot: Paco, a 10-year-old boy in cobalt hoodie and tech goggles, sitting at a wooden workbench cluttered with robot parts and blueprints. Warm afternoon sun rays streaming through large window, cozy living room interior, cinematic 16:9, hyperrealistic, 8k.",
+        "duration": 4,
+        "duration_target": 4,
+        "status": "completed",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "previewUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "character_refs": [
+          "Paco"
+        ],
+        "location": "Phòng Khách Paco",
+        "variants": [
+          {
+            "url": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+            "prompt": "Cinematic wide establishing shot: Paco, a 10-year-old boy in cobalt hoodie...",
+            "modelId": "auto",
+            "timestamp": 1791538771728
+          }
+        ]
+      },
+      {
+        "id": "SC01_B02",
+        "beat": "SC01_B02",
+        "sc": "SC01",
+        "shotId": "Shot-1.2",
+        "shotNumber": 2,
+        "sceneId": "Scene-1",
+        "sceneNumber": 1,
+        "cameraAngle": "close_up",
+        "framing": "Extreme Close-Up",
+        "angle": "Close-Up",
+        "cameraMovement": "Static Focus Pull",
+        "camera_movement": "Static Focus Pull",
+        "lens": "85mm Macro",
+        "description": "Cận cảnh đôi bàn tay khéo léo của Paco gắn lõi năng lượng Quantum Core hình lục giác phát ánh sáng lam ngọc rực rỡ vào ngực robot.",
+        "diễn_tả": "Cận cảnh đôi bàn tay khéo léo của Paco gắn lõi năng lượng Quantum Core hình lục giác phát ánh sáng lam ngọc rực rỡ vào ngực robot.",
+        "prompt": "Extreme macro close-up shot: Young boy hands holding delicate tweezers, carefully slotting a glowing hexagonal cyan quantum core into metallic robot chest. Intricate circuitry, tiny electrical sparks, beautiful bokeh, anamorphic lens flare, 8k resolution.",
+        "visual": "Extreme macro close-up shot: Young boy hands holding delicate tweezers, carefully slotting a glowing hexagonal cyan quantum core into metallic robot chest. Intricate circuitry, tiny electrical sparks, beautiful bokeh, anamorphic lens flare, 8k resolution.",
+        "storyboardPrompt": "Extreme macro close-up shot: Young boy hands holding delicate tweezers, carefully slotting a glowing hexagonal cyan quantum core into metallic robot chest. Intricate circuitry, tiny electrical sparks, beautiful bokeh, anamorphic lens flare, 8k resolution.",
+        "duration": 3.5,
+        "duration_target": 3.5,
+        "status": "completed",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+        "previewUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+        "character_refs": [
+          "Paco"
+        ],
+        "prop_refs": [
+          "Quantum Core"
+        ],
+        "location": "Phòng Khách Paco",
+        "variants": [
+          {
+            "url": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+            "prompt": "Extreme macro close-up shot: Young boy hands holding delicate tweezers...",
+            "modelId": "auto",
+            "timestamp": 1791538771728
+          }
+        ]
+      },
+      {
+        "id": "SC01_B03",
+        "beat": "SC01_B03",
+        "sc": "SC01",
+        "shotId": "Shot-1.3",
+        "shotNumber": 3,
+        "sceneId": "Scene-1",
+        "sceneNumber": 1,
+        "cameraAngle": "medium_shot",
+        "framing": "Low Angle Hero Shot",
+        "angle": "Low-Angle",
+        "cameraMovement": "Subtle Pan Right",
+        "camera_movement": "Subtle Pan Right",
+        "lens": "50mm Prime",
+        "description": "Góc máy thấp tôn vinh nhân vật: Paco thở phào nhẹ nhõm, đẩy kính bảo hộ lên trán và nở nụ cười tự tin rạng rỡ.",
+        "diễn_tả": "Góc máy thấp tôn vinh nhân vật: Paco thở phào nhẹ nhõm, đẩy kính bảo hộ lên trán và nở nụ cười tự tin rạng rỡ.",
+        "prompt": "Low angle hero medium shot: Paco smiling triumphantly, pushing protective goggles up onto his forehead, bright hopeful eyes illuminated by cyan glow from below. Cinematic lighting, heroic atmosphere, film grain, photorealistic, 8k render.",
+        "visual": "Low angle hero medium shot: Paco smiling triumphantly, pushing protective goggles up onto his forehead, bright hopeful eyes illuminated by cyan glow from below. Cinematic lighting, heroic atmosphere, film grain, photorealistic, 8k render.",
+        "storyboardPrompt": "Low angle hero medium shot: Paco smiling triumphantly, pushing protective goggles up onto his forehead, bright hopeful eyes illuminated by cyan glow from below. Cinematic lighting, heroic atmosphere, film grain, photorealistic, 8k render.",
+        "duration": 4,
+        "duration_target": 4,
+        "status": "completed",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "previewUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "character_refs": [
+          "Paco"
+        ],
+        "location": "Phòng Khách Paco",
+        "variants": [
+          {
+            "url": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+            "prompt": "Low angle hero medium shot: Paco smiling triumphantly...",
+            "modelId": "auto",
+            "timestamp": 1791538771728
+          }
+        ]
+      },
+      {
+        "id": "SC02_B01",
+        "beat": "SC02_B01",
+        "sc": "SC02",
+        "shotId": "Shot-2.1",
+        "shotNumber": 1,
+        "sceneId": "Scene-2",
+        "sceneNumber": 2,
+        "cameraAngle": "medium_shot",
+        "framing": "Dutch Angle Medium Shot",
+        "angle": "Dutch-Angle",
+        "cameraMovement": "Slow Push-In",
+        "camera_movement": "Slow Push-In",
+        "lens": "35mm",
+        "description": "Ngăn kéo bàn làm việc rung nhẹ rồi trượt mở, luồng ánh sáng huỳnh quang tím và lam thoát ra chiếu rọi khuôn mặt kinh ngạc của Paco.",
+        "diễn_tả": "Ngăn kéo bàn làm việc rung nhẹ rồi trượt mở, luồng ánh sáng huỳnh quang tím và lam thoát ra chiếu rọi khuôn mặt kinh ngạc của Paco.",
+        "prompt": "Cinematic Dutch angle medium shot: A wooden drawer slowly sliding open by itself, emitting intense purple and turquoise volumetric light beams. Paco standing back in shock, cinematic contrast, dramatic rim lighting, 8k.",
+        "visual": "Cinematic Dutch angle medium shot: A wooden drawer slowly sliding open by itself, emitting intense purple and turquoise volumetric light beams. Paco standing back in shock, cinematic contrast, dramatic rim lighting, 8k.",
+        "storyboardPrompt": "Cinematic Dutch angle medium shot: A wooden drawer slowly sliding open by itself, emitting intense purple and turquoise volumetric light beams. Paco standing back in shock, cinematic contrast, dramatic rim lighting, 8k.",
+        "duration": 3.5,
+        "duration_target": 3.5,
+        "status": "completed",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "previewUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "character_refs": [
+          "Paco"
+        ],
+        "location": "Xưởng Sáng Chế Bí Mật",
+        "variants": [
+          {
+            "url": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+            "prompt": "Cinematic Dutch angle medium shot: A wooden drawer slowly sliding open...",
+            "modelId": "auto",
+            "timestamp": 1791538771728
+          }
+        ]
+      },
+      {
+        "id": "SC02_B02",
+        "beat": "SC02_B02",
+        "sc": "SC02",
+        "shotId": "Shot-2.2",
+        "shotNumber": 2,
+        "sceneId": "Scene-2",
+        "sceneNumber": 2,
+        "cameraAngle": "close_up",
+        "framing": "Eye-level Close-Up",
+        "angle": "Eye-Level",
+        "cameraMovement": "Smooth Tilt Up",
+        "camera_movement": "Smooth Tilt Up",
+        "lens": "85mm Anamorphic",
+        "description": "Chú mèo robot AIKI bay lên lơ lửng, đôi mắt màn hình LED bật sáng hình hai vòng xoắn ốc vàng rực, nghiêng đầu tò mò nhìn Paco.",
+        "diễn_tả": "Chú mèo robot AIKI bay lên lơ lửng, đôi mắt màn hình LED bật sáng hình hai vòng xoắn ốc vàng rực, nghiêng đầu tò mò nhìn Paco.",
+        "prompt": "Eye-level close-up shot: Futuristic mechanical white cat AIKI floating mid-air, glowing amber digital eyes blinking, mechanical antenna ears twitching curiously. Highly detailed polished white chassis, sci-fi aesthetics, 8k, Unreal Engine 5.",
+        "visual": "Eye-level close-up shot: Futuristic mechanical white cat AIKI floating mid-air, glowing amber digital eyes blinking, mechanical antenna ears twitching curiously. Highly detailed polished white chassis, sci-fi aesthetics, 8k, Unreal Engine 5.",
+        "storyboardPrompt": "Eye-level close-up shot: Futuristic mechanical white cat AIKI floating mid-air, glowing amber digital eyes blinking, mechanical antenna ears twitching curiously. Highly detailed polished white chassis, sci-fi aesthetics, 8k, Unreal Engine 5.",
+        "duration": 4,
+        "duration_target": 4,
+        "status": "completed",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "previewUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+        "character_refs": [
+          "AIKI"
+        ],
+        "location": "Xưởng Sáng Chế Bí Mật",
+        "variants": [
+          {
+            "url": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+            "prompt": "Eye-level close-up shot: Futuristic mechanical white cat AIKI floating mid-air...",
+            "modelId": "auto",
+            "timestamp": 1791538771728
+          }
+        ]
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "worldAsset-1",
+      "type": "worldAssetNode",
+      "position": {
+        "x": 50,
+        "y": 50
+      },
+      "data": {
+        "label": "World Asset Hub",
+        "characters": [
+          {
+            "name": "Paco",
+            "description": "Cậu bé sáng chế 10 tuổi, tóc nâu xoăn nhẹ, đeo kính bảo hộ công nghệ viền cam, mặc áo hoodie xanh coban và găng tay thợ máy.",
+            "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+            "worldAssetCharId": "paco-dna-01",
+            "worldAssetCharName": "Paco",
+            "renderMode": "character_only",
+            "gridFormat": "2x2",
+            "aliases": "Paco, Cậu bé Paco, Cậu bé"
+          },
+          {
+            "name": "AIKI",
+            "description": "Chú mèo robot AI bay lơ lửng, lớp vỏ hợp kim trắng titan bóng loáng, đôi tai cơ khí phát sáng xanh neon, màn hình mắt hiển thị cảm xúc linh hoạt.",
+            "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192578124-747822093.webp",
+            "worldAssetCharId": "aiki-dna-02",
+            "worldAssetCharName": "AIKI",
+            "renderMode": "character_only",
+            "gridFormat": "2x2",
+            "aliases": "AIKI, Robot AIKI, Mèo máy"
+          }
+        ],
+        "locations": [
+          {
+            "name": "Phòng Khách Paco",
+            "description": "Căn phòng khách ấm áp ngập tràn ánh nắng buổi chiều, nhiều kệ sách và bản thiết kế kỹ thuật, bàn làm việc bằng gỗ sồi chứa đầy linh kiện điện tử.",
+            "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+            "worldAssetCharId": "loc-livingroom-01",
+            "worldAssetCharName": "Phòng Khách Paco",
+            "renderMode": "location_only",
+            "gridFormat": "2x2",
+            "aliases": "Phòng khách, Phòng làm việc"
+          },
+          {
+            "name": "Xưởng Sáng Chế Bí Mật",
+            "description": "Xưởng chế tạo công nghệ cao ngầm dưới lòng đất, các màn hình hiển thị dữ liệu 3D holographic, ánh sáng xanh tím phong cách Cyberpunk Sci-Fi tương lai.",
+            "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+            "worldAssetCharId": "loc-secret-lab-02",
+            "worldAssetCharName": "Xưởng Sáng Chế Bí Mật",
+            "renderMode": "location_only",
+            "gridFormat": "2x2",
+            "aliases": "Xưởng sáng chế, Phòng thí nghiệm"
+          }
+        ],
+        "props": [
+          {
+            "name": "Quantum Core",
+            "description": "Vi mạch năng lượng lượng tử hình lục giác phát sáng hào quang lam ngọc, chứa nguồn năng lượng vô tận cho cỗ máy thời gian.",
+            "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791194126035-372524110.webp",
+            "worldAssetCharId": "prop-quantum-core-01",
+            "worldAssetCharName": "Quantum Core",
+            "renderMode": "prop_only",
+            "gridFormat": "2x2",
+            "aliases": "Lõi năng lượng, Quantum Core, Vi mạch"
+          }
+        ]
+      }
+    },
+    {
+      "id": "emotionArc-1",
+      "type": "emotionArcNode",
+      "position": {
+        "x": 50,
+        "y": 720
+      },
+      "data": {
+        "label": "Emotional Arc & Continuity",
+        "emotionArc": [
+          {
+            "sceneId": "Scene 1",
+            "intensity": 45,
+            "valence": "positive",
+            "emotion": "Tập trung & Hào hứng",
+            "arcPosition": "setup",
+            "lighting": "Warm Golden Hour Sunlight",
+            "weather": "Clear afternoon",
+            "soundCue": "Ticking clock, mechanical clicks"
+          },
+          {
+            "sceneId": "Scene 2",
+            "intensity": 85,
+            "valence": "neutral",
+            "emotion": "Bất ngờ & Hồi hộp",
+            "arcPosition": "inciting",
+            "lighting": "Deep Blue with Neon Cyan Glow",
+            "weather": "Indoor energy surge",
+            "soundCue": "Low electronic hum, metallic resonance"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scene-1",
+      "type": "sceneNode",
+      "position": {
+        "x": 620,
+        "y": 50
+      },
+      "data": {
+        "isNarrativeScene": true,
+        "sceneId": "Scene-1",
+        "sceneGroupId": "Scene-1",
+        "sceneNumber": 1,
+        "location": "Phòng Khách Paco",
+        "timeOfDay": "DAY",
+        "title": "Mảnh Ghép Khởi Đầu",
+        "action": "Paco cặm cụi gắn vi mạch lượng tử Quantum Core vào ngực chú robot mèo AIKI trên bàn gỗ.",
+        "charactersInScene": [
+          "Paco"
+        ],
+        "props": [
+          "Quantum Core"
+        ],
+        "emotionIntensity": 45,
+        "valence": "positive",
+        "emotion": "Tập trung & Hào hứng",
+        "arcPosition": "setup",
+        "lighting": "Warm golden hour sunlight",
+        "weather": "Clear afternoon",
+        "soundCue": "Ticking clock, mechanical clicks",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/remote-1789955875213-459294623.webp",
+        "storyboardPrompt": "Warm cinematic shot of Paco, 10-year-old boy in cobalt hoodie and tech goggles, carefully soldering glowing cyan quantum microchip on wooden workshop table. Sunbeams streaming through window, dust motes floating in air, shallow depth of field, 8k, Unreal Engine 5 render."
+      }
+    },
+    {
+      "id": "scene-2",
+      "type": "sceneNode",
+      "position": {
+        "x": 1020,
+        "y": 50
+      },
+      "data": {
+        "isNarrativeScene": true,
+        "sceneId": "Scene-2",
+        "sceneGroupId": "Scene-2",
+        "sceneNumber": 2,
+        "location": "Xưởng Sáng Chế Bí Mật",
+        "timeOfDay": "NIGHT",
+        "title": "Sự Thức Tỉnh Của AIKI",
+        "action": "Từ ngăn kéo phát ra ánh sáng tím, robot mèo AIKI bay lơ lửng, chớp mắt hai vòng tròn vàng và cất tiếng chào.",
+        "charactersInScene": [
+          "Paco",
+          "AIKI"
+        ],
+        "props": [],
+        "emotionIntensity": 85,
+        "valence": "neutral",
+        "emotion": "Bất ngờ & Hồi hộp",
+        "arcPosition": "inciting",
+        "lighting": "Deep blue with neon cyan glow",
+        "weather": "Indoor energy surge",
+        "soundCue": "Low electronic hum, metallic resonance",
+        "renderUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "imageUrl": "https://dev-hub.storymee.com/internal/v1/media/public/uploads/b64-1791192516806-350959521.webp",
+        "storyboardPrompt": "Dark atmospheric sci-fi scene: A sleek white robotic cat with glowing cyan ears and amber circular digital eyes levitating inside high-tech underground laboratory. Neon accents, holographic diagrams, volumetric smoke, 8k resolution."
+      }
+    },
+    {
+      "id": "reviewBoard-1",
+      "type": "reviewBoardNode",
+      "position": {
+        "x": 1420,
+        "y": 50
+      },
+      "data": {
+        "projectName": "Paco & Cỗ Máy Thời Gian",
+        "totalShots": 5,
+        "completedShots": 5,
+        "totalRuntime": 19,
+        "aspectRatio": "16:9"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-world-scene1",
+      "source": "worldAsset-1",
+      "target": "scene-1",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#6366f1"
+      }
+    },
+    {
+      "id": "e-world-scene2",
+      "source": "worldAsset-1",
+      "target": "scene-2",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#6366f1"
+      }
+    },
+    {
+      "id": "e-arc-scene1",
+      "source": "emotionArc-1",
+      "target": "scene-1",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ec4899"
+      }
+    },
+    {
+      "id": "e-arc-scene2",
+      "source": "emotionArc-1",
+      "target": "scene-2",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ec4899"
+      }
+    },
+    {
+      "id": "e-scene1-review",
+      "source": "scene-1",
+      "target": "reviewBoard-1",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#10b981"
+      }
+    },
+    {
+      "id": "e-scene2-review",
+      "source": "scene-2",
+      "target": "reviewBoard-1",
+      "type": "smoothstep",
+      "animated": false,
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#10b981"
+      }
+    }
+  ]
+}

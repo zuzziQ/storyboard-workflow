@@ -104,38 +104,71 @@ export const sanitizeHubUrl = (url: string | undefined | null): string => {
 };
 
 
-import { CoreApiClient } from '@storymee/api-client';
+/**
+ * Normalizes legacy /api/* URLs to new V2 backend route paths:
+ * - /api/world-asset/ -> /internal/v1/asset/world/
+ * - /api/media/image -> /v1/media/image
+ * - /api/media/video -> /v1/media/video
+ * - /api/media/prompt -> /v1/media/prompt
+ * - /api/agent/refine-prompt -> /worker/v1/media/agent/refine-prompt
+ */
+export function normalizeApiUrl(path: string): string {
+  if (!path) return path;
+  let normalized = path;
 
-export const coreApi = new CoreApiClient({
-  baseURL: getApiBaseUrl(),
-});
+  // World Asset routes
+  normalized = normalized.replace(/^(\/)?api\/world-asset(\/|$)/g, '$1internal/v1/asset/world$2');
+  normalized = normalized.replace(/^(\/)?world-asset(\/|$)/g, '$1internal/v1/asset/world$2');
+
+  // Media image routes
+  normalized = normalized.replace(/\/api\/media\/image(\/|$|\?)/g, '/v1/media/image$1');
+  normalized = normalized.replace(/^api\/media\/image(\/|$|\?)/g, 'v1/media/image$1');
+
+  // Media video routes
+  normalized = normalized.replace(/\/api\/media\/video(\/|$|\?)/g, '/v1/media/video$1');
+  normalized = normalized.replace(/^api\/media\/video(\/|$|\?)/g, 'v1/media/video$1');
+
+  // Media prompt routes
+  normalized = normalized.replace(/\/api\/media\/prompt(\/|$|\?)/g, '/v1/media/prompt$1');
+  normalized = normalized.replace(/^api\/media\/prompt(\/|$|\?)/g, 'v1/media/prompt$1');
+
+  // Agent refine prompt routes
+  normalized = normalized.replace(/\/api\/agent\/refine-prompt(\/|$|\?)/g, '/worker/v1/media/agent/refine-prompt$1');
+  normalized = normalized.replace(/^api\/agent\/refine-prompt(\/|$|\?)/g, 'worker/v1/media/agent/refine-prompt$1');
+
+  return normalized;
+}
 
 export async function coreRequest<T = any>(path: string, options: RequestInit = {}): Promise<T> {
-  const { method = 'GET', body, headers } = options;
-  const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-  
-  const config = {
-    baseURL: getApiBaseUrl(),
-    headers: {
-      'Authorization': `Bearer ${HUB_API_KEY}`,
-      ...headers as any
-    }
+  const { method = 'GET', body, headers = {} } = options;
+  const HUB_API_KEY = (typeof window !== 'undefined' ? localStorage.getItem('STORYMEE_HUB_API_KEY') : null) || import.meta.env.VITE_HUB_API_KEY || '';
+  const baseUrl = getApiBaseUrl().replace(/\/+$/, '');
+  const cleanPath = normalizeApiUrl(path).replace(/^\/+/, '');
+  const fullUrl = `${baseUrl}/${cleanPath}`;
+
+  const requestHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(headers as Record<string, string>),
   };
-
-  let data = body;
-  if (typeof body === 'string') {
-    try { data = JSON.parse(body); } catch(e) {}
+  if (HUB_API_KEY) {
+    requestHeaders['Authorization'] = `Bearer ${HUB_API_KEY}`;
   }
 
-  let cleanPath = path;
-  if (cleanPath.startsWith('/api/')) cleanPath = cleanPath.substring(4);
-  else if (cleanPath.startsWith('api/')) cleanPath = cleanPath.substring(3);
-
-  switch (method.toUpperCase()) {
-    case 'POST': return await coreApi.post<T>(cleanPath, data, config);
-    case 'PUT': return await coreApi.put<T>(cleanPath, data, config);
-    case 'DELETE': return await coreApi.delete<T>(cleanPath, config);
-    case 'PATCH': return await coreApi.patch<T>(cleanPath, data, config);
-    default: return await coreApi.get<T>(cleanPath, config);
+  let requestBody: any = body;
+  if (typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && body !== null) {
+    requestBody = JSON.stringify(body);
   }
+
+  const res = await fetchWithTimeout(fullUrl, {
+    method,
+    headers: requestHeaders,
+    body: requestBody,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.error || errorData?.message || `Request failed with status ${res.status}`);
+  }
+
+  return await res.json() as T;
 }

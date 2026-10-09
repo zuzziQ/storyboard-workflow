@@ -33,7 +33,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -231,7 +231,7 @@ const PacoShotDetailModal = memo(function PacoShotDetailModal({
       ).filter(Boolean);
       const shotType = sh.cameraSize || sh.shotType || 'medium';
 
-      const res = await fetch(`${baseUrl}/world-asset/projects/${projectId}/auto-layout`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/projects/${projectId}/auto-layout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, characters: charRefs, shotType })

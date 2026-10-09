@@ -73,10 +73,29 @@ export function compileCinematicPrompt(sh: any, projectStyle: string = "Pixar-st
   const charSizeDesc = getCharacterSizeDescription(sh.characterSize);
   let promptText = "";
   let videoPromptText = "";
-  
-  // Storyboard header ko chứa những gì ảnh hưởng tạo video (@IMAGE1, camera movement) và thay bằng Tên nhân vật/bối cảnh trực quan
-  const storyboardStyleHeader = `Premium stylized 3D family animation, ${projectStyle}, bối cảnh @${locationName}, ${ratio}, ${framing}.${charSizeDesc ? ' Character scale: ' + charSizeDesc + '.' : ''} Match characters @${charNamesStr} for identity, composition, spatial layout.`;
-  const styleHeader = `Premium stylized 3D family animation, ${projectStyle}, [environment], ${ratio}, ${framing}.${charSizeDesc ? ' Character scale: ' + charSizeDesc + '.' : ''} Match @IMAGE1 for composition, spatial layout, and screen direction.`;
+
+  // Emotional Arc and Lighting extraction
+  const rawEmotion = sh.emotion || sh.sceneEmotion || "focused";
+  const rawIntensity = sh.sceneEmotionIntensity ?? sh.emotionIntensity;
+  const intensityScore = rawIntensity !== undefined && rawIntensity !== null
+    ? Math.min(10, Math.max(1, Math.round(Number(rawIntensity) > 10 ? Number(rawIntensity) / 10 : Number(rawIntensity))))
+    : null;
+  const emotionDesc = intensityScore ? `${rawEmotion} (intensity: ${intensityScore}/10)` : rawEmotion;
+  const emotionPerformance = `Emotional tone: ${emotionDesc}. Facial expression & body language reflecting ${rawEmotion}.`;
+
+  // Lighting & Atmosphere
+  const lightingParts: string[] = [];
+  if (sh.sceneLighting) lightingParts.push(`Lighting: ${sh.sceneLighting}`);
+  if (sh.sceneWeather) lightingParts.push(`Atmosphere: ${sh.sceneWeather}`);
+  const lightingAtmosphere = lightingParts.length > 0 ? ` ${lightingParts.join('. ')}.` : '';
+
+  // Clean video style header without @IMAGE1 or [environment] for modern video AI models (Veo 3.1, Dreamina, Kling)
+  const cleanLocationName = (locationName && locationName !== 'environment') ? locationName : '';
+  const locationTag = cleanLocationName ? `, setting: ${cleanLocationName}` : '';
+  const videoStyleHeader = `Cinematic 3D animation, ${projectStyle}${locationTag}, ${ratio}, ${framing}.${charSizeDesc ? ' Character scale: ' + charSizeDesc + '.' : ''}${lightingAtmosphere}`;
+
+  // Storyboard header with characters/location identity refs
+  const storyboardStyleHeader = `Premium stylized 3D family animation, ${projectStyle}, bối cảnh @${locationName}, ${ratio}, ${framing}.${charSizeDesc ? ' Character scale: ' + charSizeDesc + '.' : ''} Match characters @${charNamesStr} for identity, composition, spatial layout.${lightingAtmosphere}`;
 
   // Filter semantic terms from prompts
   const cleanFirstFrame = cleanSemanticLanguage(firstFrame || action);
@@ -90,18 +109,27 @@ export function compileCinematicPrompt(sh: any, projectStyle: string = "Pixar-st
     // Storyboard visual: Static composition, no video-only stuff
     promptText = `${storyboardStyleHeader} Subject: ${cleanFirstFrameImg}. Setup: ${cleanDeltaImg}. Prop State: ${propState || "stable"}. No text, subtitles, UI, logos, panel border.`;
     // Video visual: Motion, camera, timing
-    videoPromptText = `${styleHeader} Start: object in focus ${cleanFirstFrame}. Motion: single physical change — ${cleanDelta}. Camera: locked readable close-up. End: ${cleanLastFrame}. Prop State: ${propState || "stable"}. SFX/ambient only: soft visual object sounds. No text, subtitles, UI, logos, fake writing, panel border.`;
+    videoPromptText = `${videoStyleHeader} Start: object in focus ${cleanFirstFrame}. Motion: single physical change — ${cleanDelta}. Camera: locked readable close-up. End: ${cleanLastFrame}. Prop State: ${propState || "stable"}. Soft ambient sound only. No text, subtitles, UI, logos, panel border, morphing.`;
   } else if (category === 'reaction') {
     // Storyboard visual: Static composition, no video-only stuff
-    promptText = `${storyboardStyleHeader} Subject: character position ${cleanFirstFrameImg}. Expression: start expression. No text, subtitles, UI, logos.`;
+    promptText = `${storyboardStyleHeader} Subject: character position ${cleanFirstFrameImg}. Expression: ${rawEmotion}. No text, subtitles, UI, logos.`;
     // Video visual: Motion, camera, timing
-    videoPromptText = `${styleHeader} Start: character position ${cleanFirstFrame}. Performance: subtle mouth acting for post-sync only; moves from start expression to end expression with eyeline locked. Camera: ${camera}. End: ${cleanLastFrame}. SFX/ambient only: room tone. No generated speech, music, subtitles, captions, UI, logos, fake writing.`;
+    videoPromptText = `${videoStyleHeader} Start: character position ${cleanFirstFrame}. ${emotionPerformance} Camera: ${camera}. Performance: subtle acting, natural eye focus and fluid head motion. End: ${cleanLastFrame}. Room tone only. No speech audio, subtitles, captions, UI, logos, panel border, morphing.`;
   } else {
     // Storyboard visual: Static composition, no video-only stuff
-    promptText = `${storyboardStyleHeader} Subject: ${cleanFirstFrameImg}. Action Setup: ${cleanDeltaImg}. No text, subtitles, UI, logos, panel border.`;
+    promptText = `${storyboardStyleHeader} Subject: ${cleanFirstFrameImg}. Action Setup: ${cleanDeltaImg}. Expression: ${rawEmotion}. No text, subtitles, UI, logos, panel border.`;
     // Video visual: Motion, camera, timing
-    videoPromptText = `${styleHeader} Start: ${cleanFirstFrame}. Motion: one clean primary action — ${cleanDelta}. Secondary reactions stay simple. Camera: ${camera}. End: ${cleanLastFrame}. SFX/ambient only: action sounds. No generated speech, music, text, subtitles, UI, logos, panel border, morphing.`;
+    videoPromptText = `${videoStyleHeader} Start: ${cleanFirstFrame}. Motion: one clean primary action — ${cleanDelta}. ${emotionPerformance} Camera: ${camera}. End: ${cleanLastFrame}. Ambient action sounds only. No speech audio, subtitles, captions, UI, logos, panel border, morphing.`;
   }
+
+  // Sanitize simulated tags or noise text from video prompt
+  videoPromptText = videoPromptText
+    .replace(/@IMAGE\d+/gi, '')
+    .replace(/\[environment\]/gi, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+\./g, '.')
+    .replace(/\.{2,}/g, '.')
+    .trim();
 
   // 4. Word count calculation and compression safety
   const wordCount = videoPromptText.split(/\s+/).filter(Boolean).length;

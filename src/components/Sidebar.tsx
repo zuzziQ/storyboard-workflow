@@ -11,7 +11,7 @@ export default function Sidebar({ onDragStart }: { onDragStart: (event: React.Dr
         <button 
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isDrawerOpen ? 'bg-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
-            title="Toggle Script & Assets Drawer"
+            title={isDrawerOpen ? "Đóng Bảng Kịch Bản (Script Drawer)" : "Mở Bảng Kịch Bản & Tài Sản (Script Drawer)"}
         >
             <FileText size={16} />
         </button>

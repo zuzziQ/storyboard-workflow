@@ -98,6 +98,9 @@ export interface SceneData {
   scenePurpose?: string;
   emotionHook?: string;
   outerSetup?: boolean;
+  renderUrl?: string;
+  imageUrl?: string;
+  [key: string]: any;
 }
 
 // Helper function to get synchronized settings from Zustand store or fallbacks
@@ -233,7 +236,7 @@ async function executePrompt(
 async function callHubAPI(promptOrText: string, token: string, existingAssets?: any[]): Promise<ParsedScript> {
   const settings = getLlmSettings();
   const hubUrl = settings.hubUrl ? settings.hubUrl.replace(/\/$/, '') : getApiBaseUrl();
-  const HUB_API_URL = `${hubUrl}/api/media/prompt`;
+  const HUB_API_URL = `${hubUrl}/v1/media/prompt`;
   
   let assetsContext = "";
   if (existingAssets && existingAssets.length > 0) {

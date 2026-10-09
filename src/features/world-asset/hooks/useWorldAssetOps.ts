@@ -214,7 +214,7 @@ export function useWorldAssetOps({
         const headers: any = { 'Content-Type': 'application/json' };
         if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
 
-        const getRes = await fetch(`${baseUrl}/api/world-asset/characters/${activeSliceAsset.worldAssetCharId}`, {
+        const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${activeSliceAsset.worldAssetCharId}`, {
           method: 'GET',
           headers
         });
@@ -237,7 +237,7 @@ export function useWorldAssetOps({
             else if (type === 'location') updateCanvasLocations(updated);
             else if (type === 'prop') updateCanvasProps(updated);
 
-            await fetch(`${baseUrl}/api/world-asset/characters/${activeSliceAsset.worldAssetCharId}`, {
+            await fetch(`${baseUrl}/internal/v1/asset/world/characters/${activeSliceAsset.worldAssetCharId}`, {
               method: 'PUT',
               headers,
               body: JSON.stringify(assetDetail)
@@ -276,7 +276,7 @@ export function useWorldAssetOps({
       const headers: any = { 'Content-Type': 'application/json' };
       if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
 
-      const getRes = await fetch(`${baseUrl}/api/world-asset/characters/${worldAssetId}`, {
+      const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${worldAssetId}`, {
         method: 'GET',
         headers
       });
@@ -297,7 +297,7 @@ export function useWorldAssetOps({
 
           assetDetail.styleGuide = typeof sg === 'string' ? sg : JSON.stringify(sg);
 
-          const putRes = await fetch(`${baseUrl}/api/world-asset/characters/${worldAssetId}`, {
+          const putRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${worldAssetId}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(assetDetail)
@@ -339,7 +339,7 @@ export function useWorldAssetOps({
       const headers: any = { 'Content-Type': 'application/json' };
       if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
 
-      const response = await fetch(`${baseUrl}/api/world-asset/characters`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/characters`, {
          method: 'POST',
          headers,
          body: JSON.stringify(payload)
@@ -425,7 +425,7 @@ export function useWorldAssetOps({
                 const headers: any = { 'Content-Type': 'application/json' };
                 if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
                 
-                const getRes = await fetch(`${baseUrl}/api/world-asset/characters/${resolvedCharId}`, {
+                const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedCharId}`, {
                    method: 'GET',
                    headers
                 });
@@ -445,7 +445,7 @@ export function useWorldAssetOps({
                       
                       assetDetail.styleGuide = typeof sg === 'string' ? sg : JSON.stringify(sg);
                       
-                      const putRes = await fetch(`${baseUrl}/api/world-asset/characters/${resolvedCharId}`, {
+                      const putRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedCharId}`, {
                          method: 'PUT',
                          headers,
                          body: JSON.stringify(assetDetail)
@@ -536,7 +536,7 @@ export function useWorldAssetOps({
                const headers: any = { 'Content-Type': 'application/json' };
                if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
                
-               const getRes = await fetch(`${baseUrl}/api/world-asset/characters/${resolvedLocId}`, {
+               const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedLocId}`, {
                   method: 'GET',
                   headers
                });
@@ -556,7 +556,7 @@ export function useWorldAssetOps({
                      
                      assetDetail.styleGuide = typeof sg === 'string' ? sg : JSON.stringify(sg);
                      
-                     const putRes = await fetch(`${baseUrl}/api/world-asset/characters/${resolvedLocId}`, {
+                     const putRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedLocId}`, {
                         method: 'PUT',
                         headers,
                         body: JSON.stringify(assetDetail)
@@ -799,13 +799,13 @@ export function useWorldAssetOps({
 
       let response;
       if (worldAssetId) {
-        response = await fetch(`${baseUrl}/api/world-asset/characters/${worldAssetId}`, {
+        response = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${worldAssetId}`, {
            method: 'PUT',
            headers,
            body: JSON.stringify(payload)
         });
       } else {
-        response = await fetch(`${baseUrl}/api/world-asset/characters`, {
+        response = await fetch(`${baseUrl}/internal/v1/asset/world/characters`, {
            method: 'POST',
            headers,
            body: JSON.stringify(payload)
@@ -984,14 +984,14 @@ export function useWorldAssetOps({
         if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
 
         if (worldAssetId) {
-          const res = await fetch(`${baseUrl}/api/world-asset/characters/${worldAssetId}`, {
+          const res = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${worldAssetId}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(payload)
           });
           if (res.ok) successCount++;
         } else {
-          const res = await fetch(`${baseUrl}/api/world-asset/characters`, {
+          const res = await fetch(`${baseUrl}/internal/v1/asset/world/characters`, {
             method: 'POST',
             headers,
             body: JSON.stringify(payload)
@@ -1171,70 +1171,163 @@ export function useWorldAssetOps({
     updateCanvasProps(updated);
   };
 
-  const handleUploadFileChar = (e: React.ChangeEvent<HTMLInputElement>, charIndex: number) => {
+  const handleUploadFileChar = async (e: React.ChangeEvent<HTMLInputElement>, charIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      if (ev.target?.result) {
-         const newBase64 = ev.target.result as string;
-         const gflowMediaId = await uploadReferenceImage(newBase64);
-
-         const updated = [...canvasCharacters];
-         updated[charIndex] = { 
-            ...updated[charIndex], 
-            imageUrl: newBase64,
-            mediaId: gflowMediaId || undefined
-         };
-         updateCanvasCharacters(updated);
+    try {
+      // 1. Upload qua API World Asset để lấy URL lưu trữ CDN thật
+      const uploadRes = await uploadFileToDB(file, file.name);
+      const cdnUrl = uploadRes.url;
+      
+      // 2. Upload reference lên Extension nếu có
+      let gflowMediaId: string | null = null;
+      try {
+        const base64 = await getBase64Image(cdnUrl);
+        gflowMediaId = await uploadReferenceImage(base64);
+      } catch (e) {
+        console.warn("Upload to extension skipped:", e);
       }
-    };
-    reader.readAsDataURL(file);
+
+      // 3. Cập nhật state Canvas
+      const updated = [...canvasCharacters];
+      updated[charIndex] = {
+        ...updated[charIndex],
+        imageUrl: cdnUrl,
+        mediaId: gflowMediaId || undefined
+      };
+      updateCanvasCharacters(updated);
+
+      // 4. Đồng bộ rootImageUrl vào DB nếu đã có WorldAssetId
+      const resolvedCharId = await ensureWorldAssetId('character', charIndex);
+      if (resolvedCharId) {
+        const baseUrl = getApiBaseUrl();
+        const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
+
+        const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedCharId}`, { headers });
+        if (getRes.ok) {
+          const detail = await getRes.json();
+          if (detail) {
+            detail.rootImageUrl = cdnUrl;
+            await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedCharId}`, {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify(detail)
+            });
+          }
+        }
+      }
+      window.dispatchEvent(new CustomEvent('WORLD_ASSETS_CHANGED'));
+    } catch (err: any) {
+      alert("❌ Lỗi tải ảnh nhân vật lên World Asset: " + err.message);
+    }
   };
 
-  const handleUploadFileLoc = (e: React.ChangeEvent<HTMLInputElement>, locIndex: number) => {
+  const handleUploadFileLoc = async (e: React.ChangeEvent<HTMLInputElement>, locIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      if (ev.target?.result) {
-         const newBase64 = ev.target.result as string;
-         const gflowMediaId = await uploadReferenceImage(newBase64);
-
-         const updated = [...canvasLocations];
-         updated[locIndex] = { 
-            ...updated[locIndex], 
-            imageUrl: newBase64,
-            mediaId: gflowMediaId || undefined
-         };
-         updateCanvasLocations(updated);
+    try {
+      // 1. Upload qua API World Asset để lấy URL lưu trữ CDN thật
+      const uploadRes = await uploadFileToDB(file, file.name);
+      const cdnUrl = uploadRes.url;
+      
+      // 2. Upload reference lên Extension nếu có
+      let gflowMediaId: string | null = null;
+      try {
+        const base64 = await getBase64Image(cdnUrl);
+        gflowMediaId = await uploadReferenceImage(base64);
+      } catch (e) {
+        console.warn("Upload to extension skipped:", e);
       }
-    };
-    reader.readAsDataURL(file);
+
+      // 3. Cập nhật state Canvas
+      const updated = [...canvasLocations];
+      updated[locIndex] = {
+        ...updated[locIndex],
+        imageUrl: cdnUrl,
+        mediaId: gflowMediaId || undefined
+      };
+      updateCanvasLocations(updated);
+
+      // 4. Đồng bộ rootImageUrl vào DB nếu đã có WorldAssetId
+      const resolvedLocId = await ensureWorldAssetId('location', locIndex);
+      if (resolvedLocId) {
+        const baseUrl = getApiBaseUrl();
+        const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
+
+        const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedLocId}`, { headers });
+        if (getRes.ok) {
+          const detail = await getRes.json();
+          if (detail) {
+            detail.rootImageUrl = cdnUrl;
+            await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedLocId}`, {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify(detail)
+            });
+          }
+        }
+      }
+      window.dispatchEvent(new CustomEvent('WORLD_ASSETS_CHANGED'));
+    } catch (err: any) {
+      alert("❌ Lỗi tải ảnh bối cảnh lên World Asset: " + err.message);
+    }
   };
 
-  const handleUploadFileProp = (e: React.ChangeEvent<HTMLInputElement>, propIndex: number) => {
+  const handleUploadFileProp = async (e: React.ChangeEvent<HTMLInputElement>, propIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      if (ev.target?.result) {
-         const newBase64 = ev.target.result as string;
-         const gflowMediaId = await uploadReferenceImage(newBase64);
-
-         const updated = [...canvasProps];
-         updated[propIndex] = { 
-            ...updated[propIndex], 
-            imageUrl: newBase64,
-            mediaId: gflowMediaId || undefined
-         };
-         updateCanvasProps(updated);
+    try {
+      // 1. Upload qua API World Asset để lấy URL lưu trữ CDN thật
+      const uploadRes = await uploadFileToDB(file, file.name);
+      const cdnUrl = uploadRes.url;
+      
+      // 2. Upload reference lên Extension nếu có
+      let gflowMediaId: string | null = null;
+      try {
+        const base64 = await getBase64Image(cdnUrl);
+        gflowMediaId = await uploadReferenceImage(base64);
+      } catch (e) {
+        console.warn("Upload to extension skipped:", e);
       }
-    };
-    reader.readAsDataURL(file);
+
+      // 3. Cập nhật state Canvas
+      const updated = [...canvasProps];
+      updated[propIndex] = {
+        ...updated[propIndex],
+        imageUrl: cdnUrl,
+        mediaId: gflowMediaId || undefined
+      };
+      updateCanvasProps(updated);
+
+      // 4. Đồng bộ rootImageUrl vào DB nếu đã có WorldAssetId
+      const resolvedPropId = await ensureWorldAssetId('prop', propIndex);
+      if (resolvedPropId) {
+        const baseUrl = getApiBaseUrl();
+        const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
+
+        const getRes = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedPropId}`, { headers });
+        if (getRes.ok) {
+          const detail = await getRes.json();
+          if (detail) {
+            detail.rootImageUrl = cdnUrl;
+            await fetch(`${baseUrl}/internal/v1/asset/world/characters/${resolvedPropId}`, {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify(detail)
+            });
+          }
+        }
+      }
+      window.dispatchEvent(new CustomEvent('WORLD_ASSETS_CHANGED'));
+    } catch (err: any) {
+      alert("❌ Lỗi tải ảnh đạo cụ lên World Asset: " + err.message);
+    }
   };
 
   const loadVariantsForChar = async (charId: string, force = false) => {
@@ -1245,7 +1338,7 @@ export function useWorldAssetOps({
       const headers: any = {};
       if (HUB_API_KEY) headers['Authorization'] = `Bearer ${HUB_API_KEY}`;
 
-      const res = await fetch(`${baseUrl}/api/world-asset/characters/${charId}/assets`, { headers });
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/characters/${charId}/assets`, { headers });
       if (res.ok) {
         const list = await res.json();
         setCharVariants(prev => ({ ...prev, [charId]: list || [] }));
@@ -1268,7 +1361,7 @@ export function useWorldAssetOps({
     try {
       const baseUrl = getApiBaseUrl();
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-      const res = await fetch(`${baseUrl}/api/world-asset/episodes/${projectData.id}/storyboard-assets`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/episodes/${projectData.id}/storyboard-assets`, {
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
         }

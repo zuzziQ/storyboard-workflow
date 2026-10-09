@@ -27,7 +27,7 @@ export const createMediaJob = async (type: 'image' | 'video', payload: JobPayloa
   const token = getAuthToken();
 
   const API_URL = getApiBaseUrl();
-  const endpoint = `${API_URL}/api/media/${type}`;
+  const endpoint = `${API_URL}/v1/media/${type}`;
 
   const durationSeconds = payload.config?.duration 
     ? parseInt(payload.config.duration.replace('s', '')) 
@@ -80,12 +80,22 @@ export const checkJobStatus = async (jobId: string) => {
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
   
-  const response = await fetch(`${API_URL}/api/media/status/${jobId}`, {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  let response = await fetch(`${API_URL}/internal/v1/jobs/${jobId}`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
+    headers
   });
+
+  if (!response.ok) {
+    response = await fetch(`${API_URL}/v1/media/tasks/${jobId}`, {
+      method: 'GET',
+      headers
+    });
+  }
 
   if (!response.ok) {
     throw new Error(`Failed to check status for job ${jobId}`);
@@ -103,7 +113,7 @@ export const syncEpisodeToDB = async (payload: { projectId?: string; universeId?
     projectId: payload.projectId || payload.universeId,
     universeId: payload.projectId || payload.universeId
   };
-  const response = await fetch(`${API_URL}/api/world-asset/episodes/sync`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/episodes/sync`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -122,7 +132,7 @@ export const syncEpisodeToDB = async (payload: { projectId?: string; universeId?
 export const fetchEpisodeFromDB = async (universeId: string, episodeId: string) => {
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
-  const response = await fetch(`${API_URL}/api/world-asset/episodes?projectId=${universeId}`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/episodes?projectId=${universeId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -139,7 +149,7 @@ export const fetchEpisodeFromDB = async (universeId: string, episodeId: string) 
 export const fetchStoryboardAssetsFromDB = async (episodeId: string) => {
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
-  const response = await fetch(`${API_URL}/api/world-asset/episodes/${episodeId}/storyboard-assets`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/episodes/${episodeId}/storyboard-assets`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -158,7 +168,7 @@ export const uploadFileToDB = async (file: Blob, filename = 'slice.jpg'): Promis
   const formData = new FormData();
   formData.append('file', file, filename);
 
-  const response = await fetch(`${API_URL}/api/world-asset/upload`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/upload`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -178,7 +188,7 @@ export const createAssetInDB = async (payload: { ipId?: string | null; assetType
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
 
-  const response = await fetch(`${API_URL}/api/world-asset/assets`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/assets`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -204,7 +214,7 @@ export const refinePromptWithAI = async (
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
 
-  const response = await fetch(`${API_URL}/api/agent/refine-prompt`, {
+  const response = await fetch(`${API_URL}/worker/v1/media/agent/refine-prompt`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -257,7 +267,7 @@ export const resolvePromptWithAssetDNA = async (
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
 
-  const response = await fetch(`${API_URL}/api/world-asset/resolve-prompt`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/resolve-prompt`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -312,7 +322,7 @@ export const checkPromptConsistency = async (
   const token = getAuthToken();
   const API_URL = getApiBaseUrl();
 
-  const response = await fetch(`${API_URL}/api/world-asset/check-consistency`, {
+  const response = await fetch(`${API_URL}/internal/v1/asset/world/check-consistency`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

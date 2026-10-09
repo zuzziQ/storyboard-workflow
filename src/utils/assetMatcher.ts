@@ -339,7 +339,14 @@ export function hydrateShotsWithUniverseAssets(
         visualBridge: sh.transition?.visualBridge || sh.visualBridge || sh.visual_bridge || parsedTrans.visualBridge || '',
         transitionGeometry: sh.transition?.transitionGeometry || sh.transitionGeometry || sh.transition_geometry || parsedTrans.transitionGeometry || '',
         audioSfxRules: sh.transition?.audioSfxRules || sh.audioSfxRules || sh.audio_sfx_rules || parsedTrans.audioSfxRules || '',
-      }
+      },
+      sceneEmotion: sh.sceneEmotion || matchedScene?.emotion || matchedScene?.sceneEmotion || '',
+      sceneEmotionIntensity: sh.sceneEmotionIntensity ?? matchedScene?.emotionIntensity ?? matchedScene?.intensity ?? 50,
+      sceneValence: sh.sceneValence || matchedScene?.valence || 'neutral',
+      sceneLighting: sh.sceneLighting || matchedScene?.lighting || '',
+      sceneWeather: sh.sceneWeather || matchedScene?.weather || '',
+      sceneArcPosition: sh.sceneArcPosition || matchedScene?.arcPosition || '',
+      emotion: sh.emotion || matchedScene?.emotion || 'neutral',
     };
   });
 }

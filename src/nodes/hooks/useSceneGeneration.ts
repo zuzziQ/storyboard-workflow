@@ -104,7 +104,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -145,7 +145,7 @@ const resolveReferencedAssetMedia = async (
    
    try {
       console.log(`[OrchestratorQuery] Querying DB for character ${characterId} with tag: ${tagId}...`);
-      const response = await fetch(`${baseUrl}/api/world-asset/orchestrator/query`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/query`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ characterId, tagId })
@@ -424,7 +424,7 @@ export function useSceneGeneration(id: string, data: any, modelId: string, ratio
 
          linkedAssetIds.forEach(assetId => {
             const tagId = `scene_gen_${id.toLowerCase()}_${Date.now()}`;
-            fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+            fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
                method: 'POST',
                headers,
                body: JSON.stringify({

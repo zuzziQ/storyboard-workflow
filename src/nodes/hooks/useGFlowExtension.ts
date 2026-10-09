@@ -103,7 +103,7 @@ export function useGFlowExtension({ projectData, setProjectData }: GFlowExtensio
         const baseUrl = getApiBaseUrl();
         const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
         
-        const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+        const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${HUB_API_KEY}`

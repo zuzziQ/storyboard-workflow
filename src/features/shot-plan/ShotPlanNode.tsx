@@ -1,4 +1,4 @@
-import { useState, useRef, memo } from 'react';
+import { useState, useRef, memo, useMemo, useEffect } from 'react';
 import { Film, Plus, Trash2, Zap, HelpCircle, ArrowLeft, Eye, X, Maximize2, MapPin, User, Clock, Sparkles, Check, Link2, TrendingUp, Loader2, Wand2, Image as ImageIcon, Play, Download, Lock, Unlock, Star } from 'lucide-react';
 import { useFlowStore } from '../../store/useFlowStore';
 import { generateShotsForSingleScene } from '../../utils/generateExpandedShots';
@@ -123,7 +123,7 @@ const uploadImageToGFlow = async (base64Image: string, projectId: string, useRem
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
       
-      const res = await fetch(`${baseUrl}/api/world-asset/upload`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HUB_API_KEY}`
@@ -186,7 +186,7 @@ const resolveReferencedAssetMedia = async (
    
    try {
       console.log(`[OrchestratorQuery] Querying DB for character ${characterId} with tag: ${tagId}...`);
-      const response = await fetch(`${baseUrl}/api/world-asset/orchestrator/query`, {
+      const response = await fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/query`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ characterId, tagId })
@@ -370,8 +370,20 @@ const getShotVerifiedAssets = (sh: any, allCharacters: any[], allLocations: any[
 
 function ShotPlanNode() {
   const parsedData = useFlowStore((state) => state.parsedData);
-  const pendingShots = useFlowStore((state) => state.pendingShots);
+  const rawPendingShots = useFlowStore((state) => state.pendingShots);
   const setPendingShots = useFlowStore((state) => state.setPendingShots);
+  const pendingShots = useMemo(() => {
+    if (rawPendingShots && rawPendingShots.length > 0) return rawPendingShots;
+    if (parsedData?.shots && parsedData.shots.length > 0) return parsedData.shots;
+    return [];
+  }, [rawPendingShots, parsedData]);
+
+  useEffect(() => {
+    if ((!rawPendingShots || rawPendingShots.length === 0) && parsedData?.shots && parsedData.shots.length > 0) {
+      setPendingShots(parsedData.shots);
+    }
+  }, [rawPendingShots, parsedData, setPendingShots]);
+
   const activeSceneId = useFlowStore((state) => state.activeSceneId);
   const setActiveSceneId = useFlowStore((state) => state.setActiveSceneId);
   const setActiveDetailBeat = useFlowStore((state) => state.setActiveDetailBeat);
@@ -450,7 +462,26 @@ function ShotPlanNode() {
   const [viewingPromptShotId, setViewingPromptShotId] = useState<string | null>(null);
   const [viewingVideoPromptShotId, setViewingVideoPromptShotId] = useState<string | null>(null);
 
-  const scenes = parsedData?.scenes || [];
+  const scenes = useMemo(() => {
+    if (parsedData?.scenes && parsedData.scenes.length > 0) return parsedData.scenes;
+    const sceneNodes = nodes.filter(n => n.type === 'sceneNode');
+    if (sceneNodes.length > 0) {
+      return sceneNodes.map(sn => ({
+        id: sn.data?.sceneId || sn.id,
+        sceneId: sn.data?.sceneId || sn.id,
+        sceneNumber: sn.data?.sceneNumber,
+        location: sn.data?.location,
+        timeOfDay: sn.data?.timeOfDay,
+        action: sn.data?.action || sn.data?.title,
+        charactersInScene: sn.data?.charactersInScene || [],
+        props: sn.data?.props || [],
+        storyboardPrompt: sn.data?.storyboardPrompt,
+        renderUrl: sn.data?.renderUrl || sn.data?.imageUrl,
+        imageUrl: sn.data?.imageUrl || sn.data?.renderUrl
+      }));
+    }
+    return [];
+  }, [parsedData, nodes]);
 
   const worldAssetNode = nodes.find(n => n.type === 'worldAssetNode');
   const allCharacters = worldAssetNode ? (worldAssetNode.data.characters || []) : (parsedData?.characters || []);
@@ -459,7 +490,7 @@ function ShotPlanNode() {
   // Group shots by sceneId
   const getSceneShots = (sceneId: string) => {
     return pendingShots.filter((sh: any) => {
-      const shSceneId = sh.sceneId || sh.sc || sh.scene_id || '';
+      const shSceneId = sh.sceneId || sh.sc || sh.scene_id || (sh.sceneNumber ? `Scene-${sh.sceneNumber}` : '');
       return isSameScene(shSceneId, sceneId);
     });
   };
@@ -509,7 +540,7 @@ function ShotPlanNode() {
       };
 
       const HUB_API_KEY = localStorage.getItem('STORYMEE_HUB_API_KEY') || import.meta.env.VITE_HUB_API_KEY || '';
-      const response = await fetchWithTimeout(`${baseUrl}/api/agent/regenerate-scene-shots`, {
+      const response = await fetchWithTimeout(`${baseUrl}/worker/v1/media/agent/regenerate-scene-shots`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -638,7 +669,7 @@ Lưu ý: Chỉ xuất ra JSON hợp lệ nằm trong khối block code json. Kh�
       const userPrompt = `Hãy phân tích và map chính xác các shot sau:
 ${JSON.stringify(shotsPayload, null, 2)}`;
 
-      const HUB_API_URL = `${baseUrl}/api/media/prompt`;
+      const HUB_API_URL = `${baseUrl}/v1/media/prompt`;
       
       const response = await fetch(HUB_API_URL, {
         method: 'POST',
@@ -1002,7 +1033,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
       ).filter(Boolean);
       const shotType = sh.cameraSize || sh.shotType || 'medium';
 
-      const res = await fetch(`${baseUrl}/world-asset/projects/${projectId}/auto-layout`, {
+      const res = await fetch(`${baseUrl}/internal/v1/asset/world/projects/${projectId}/auto-layout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, characters: charRefs, shotType })
@@ -1026,7 +1057,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
       
       // Đồng bộ cơ sở dữ liệu backend
       const updatedFields = { renderUrl: compositeBase64, imageUrl: compositeBase64 };
-      await fetch(`${baseUrl}/world-asset/projects/${projectId}/shots/${currentShotId}`, {
+      await fetch(`${baseUrl}/internal/v1/asset/world/projects/${projectId}/shots/${currentShotId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFields)
@@ -1215,7 +1246,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
          linkedEntities.forEach(ent => {
             if (ent.role === 'character') {
                const tagId = `shot_gen_${shotIdVal.toLowerCase()}_${Date.now()}`;
-               fetch(`${baseUrl}/api/world-asset/orchestrator/sync-variant`, {
+               fetch(`${baseUrl}/internal/v1/asset/world/orchestrator/sync-variant`, {
                   method: 'POST',
                   headers,
                   body: JSON.stringify({
@@ -1530,18 +1561,18 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
   // Check if we are showing a specific active scene or the overview
   const isOverview = activeSceneId === 'all';
   const activeScene = scenes.find((s: any) => isSameScene(s.id || s.sceneId, activeSceneId));
-  const activeSceneShots = activeScene ? getSceneShots(activeScene.id || activeScene.sceneId || "") : [];
+  const activeSceneShots = activeScene ? getSceneShots(activeScene.id || activeScene.sceneId || "") : pendingShots;
 
   const viewingShot = pendingShots.find((sh: any) => sh.id === viewingPromptShotId || sh.beat === viewingPromptShotId);
 
   // Stats & Filters logic
   const totalCount = activeSceneShots.length;
-  const hasImageCount = activeSceneShots.filter((sh: any) => !!(sh.renderUrl || sh.imageUrl)).length;
+  const hasImageCount = activeSceneShots.filter((sh: any) => !!(sh.renderUrl || sh.imageUrl || sh.previewUrl)).length;
   const hasVideoCount = activeSceneShots.filter((sh: any) => !!(sh.videoUrl || sh.renderVideoUrl || sh.video_url)).length;
-  const unrenderedCount = activeSceneShots.filter((sh: any) => !(sh.renderUrl || sh.imageUrl)).length;
+  const unrenderedCount = activeSceneShots.filter((sh: any) => !(sh.renderUrl || sh.imageUrl || sh.previewUrl)).length;
 
   const filteredShots = activeSceneShots.filter((sh: any) => {
-    const hasImg = sh.renderUrl || sh.imageUrl;
+    const hasImg = sh.renderUrl || sh.imageUrl || sh.previewUrl;
     const hasVid = sh.videoUrl || sh.renderVideoUrl || sh.video_url;
     if (mediaFilter === 'unrendered') return !hasImg;
     if (mediaFilter === 'has_image') return !!hasImg;
@@ -1579,58 +1610,102 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
             <HelpCircle size={20} className="text-slate-600" />
             <span>Kịch bản chưa được phân tích hoặc không tìm thấy scene nào.</span>
           </div>
-        ) : isOverview ? (
-          /* OVERVIEW MODE (Compact list of scenes) */
-          <div className="space-y-2.5">
-            <div className="text-[9px] uppercase tracking-wider text-indigo-400/80 font-black mb-1">
-              Danh sách Cảnh (Click Cảnh trên biểu đồ Emotion Arc hoặc chọn bên dưới để xem shot)
-            </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              {scenes.map((scene: any, index: number) => {
-                const sId = scene.id || scene.sceneId || `Scene ${index + 1}`;
+        ) : (
+          /* UNIFIED SHOTS MODE (Supports both All Scenes Overview and Single Scene) */
+          <div className="space-y-4 w-full">
+            {/* Quick Scene Selector Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-800/80 custom-scrollbar">
+              <button
+                onClick={() => setActiveSceneId('all')}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  isOverview
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 border border-indigo-400/40'
+                    : 'bg-slate-900 hover:bg-slate-850 text-slate-400 hover:text-white border border-slate-800'
+                }`}
+              >
+                <span>🎬 Tất cả các Cảnh</span>
+                <span className={`px-1.5 py-0.5 rounded font-mono text-[9px] ${isOverview ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
+                  {pendingShots.length}
+                </span>
+              </button>
+              {scenes.map((scene: any, idx: number) => {
+                const sId = scene.id || scene.sceneId || `Scene ${idx + 1}`;
                 const sShots = getSceneShots(sId);
+                const isSelected = isSameScene(sId, activeSceneId);
                 return (
-                  <div
+                  <button
                     key={sId}
                     onClick={() => setActiveSceneId(sId)}
-                    className="p-3 rounded-xl border border-slate-850 bg-slate-900/40 hover:bg-slate-900/80 hover:border-indigo-500/30 cursor-pointer transition-all flex flex-col justify-between h-24 group relative"
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                      isSelected
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 border border-indigo-400/40 font-black'
+                        : 'bg-slate-900 hover:bg-slate-850 text-slate-400 hover:text-white border border-slate-800'
+                    }`}
                   >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20">
-                          {sId}
-                        </span>
-                        <span className="text-[9px] text-slate-400 font-mono bg-slate-950/50 px-1.5 py-0.5 rounded font-bold">
-                          {sShots.length} shots
-                        </span>
-                      </div>
-                      <div className="text-[11px] font-bold text-white truncate max-w-[240px]">
-                        {scene.location || 'Bối cảnh'}
-                      </div>
-                      <div className="text-[9px] text-slate-500 truncate max-w-[240px] mt-0.5">
-                        {scene.action || scene.sceneDescription || 'Không có mô tả'}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-850/60" onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => handleGenerateForScene(scene)}
-                        className="flex items-center gap-1 px-2 py-0.5 bg-indigo-600/10 hover:bg-indigo-650 hover:text-white border border-indigo-500/20 text-[9px] font-black text-indigo-300 rounded transition-colors"
-                      >
-                        ⚡ Sinh Shot
-                      </button>
-                      <span className="text-[9px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 font-bold">
-                        Thiết kế <Eye size={10} className="ml-0.5" />
-                      </span>
-                    </div>
-                  </div>
+                    <span className="uppercase">{sId}</span>
+                    <span className="text-[9px] text-slate-400 truncate max-w-[120px]">({scene.location || 'Bối cảnh'})</span>
+                    <span className={`px-1.5 py-0.5 rounded font-mono text-[9px] ${isSelected ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'}`}>
+                      {sShots.length}
+                    </span>
+                  </button>
                 );
               })}
             </div>
-          </div>
-        ) : (
-          /* DETAILED SHOTS MODE (Right Drawer Workspace) */
-          <div className="space-y-4 w-full">
+
+            {/* If Overview: Show compact scene summary grid */}
+            {isOverview && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[9px] uppercase tracking-wider text-indigo-400/80 font-black">
+                  <span>Phân bổ phân cảnh trong kịch bản (Bấm để thiết kế riêng từng cảnh)</span>
+                  <span className="text-slate-400 font-normal">Đang hiển thị toàn bộ {pendingShots.length} shots</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {scenes.map((scene: any, index: number) => {
+                    const sId = scene.id || scene.sceneId || `Scene ${index + 1}`;
+                    const sShots = getSceneShots(sId);
+                    return (
+                      <div
+                        key={sId}
+                        onClick={() => setActiveSceneId(sId)}
+                        className="p-3 rounded-xl border border-slate-850 bg-slate-900/40 hover:bg-slate-900/80 hover:border-indigo-500/30 cursor-pointer transition-all flex flex-col justify-between h-24 group relative"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20">
+                              {sId}
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-mono bg-slate-950/50 px-1.5 py-0.5 rounded font-bold">
+                              {sShots.length} shots
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-bold text-white truncate max-w-[240px]">
+                            {scene.location || 'Bối cảnh'}
+                          </div>
+                          <div className="text-[9px] text-slate-500 truncate max-w-[240px] mt-0.5">
+                            {scene.action || scene.sceneDescription || 'Không có mô tả'}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-850/60" onClick={e => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleGenerateForScene(scene)}
+                            className="flex items-center gap-1 px-2 py-0.5 bg-indigo-600/10 hover:bg-indigo-650 hover:text-white border border-indigo-500/20 text-[9px] font-black text-indigo-300 rounded transition-colors"
+                          >
+                            ⚡ Sinh Shot
+                          </button>
+                          <button
+                            onClick={() => setActiveSceneId(sId)}
+                            className="text-[9px] text-indigo-400 group-hover:text-indigo-300 transition-colors flex items-center gap-0.5 font-bold cursor-pointer"
+                          >
+                            Thiết kế <Eye size={10} className="ml-0.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             
             {/* Scene Atmosphere & Emotional Director Panel */}
             {activeConfig && (() => {
@@ -2111,7 +2186,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
                           badgeColor = 'bg-purple-900/30 text-purple-300 border border-purple-900/50';
                         }
 
-                        const hasImg = sh.renderUrl || sh.imageUrl;
+                        const hasImg = sh.renderUrl || sh.imageUrl || sh.previewUrl;
                         const isActiveGen = isStateActive(renderingStates[shotIdVal]) || isStateActive(videoStates[shotIdVal]);
 
                         return (
@@ -2198,7 +2273,7 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
                       // Asset Verify: realtime match
                       const verifiedAssets = getShotVerifiedAssets(sh, allCharacters, allLocations);
 
-                      const hasImg = sh.renderUrl || sh.imageUrl;
+                      const hasImg = sh.renderUrl || sh.imageUrl || sh.previewUrl;
                       const hasVid = sh.videoUrl || sh.renderVideoUrl || sh.video_url;
 
                       return (
@@ -2730,12 +2805,14 @@ ${JSON.stringify(shotsPayload, null, 2)}`;
             </div>
 
             {/* Back Button bottom */}
-            <button
-              onClick={() => setActiveSceneId('all')}
-              className="w-full py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[11px] font-black uppercase text-indigo-400 hover:text-indigo-300 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              ◀ Quay lại danh sách tổng quan cảnh
-            </button>
+            {activeSceneId !== 'all' && (
+              <button
+                onClick={() => setActiveSceneId('all')}
+                className="w-full py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[11px] font-black uppercase text-indigo-400 hover:text-indigo-300 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                ◀ Quay lại danh sách tổng quan cảnh
+              </button>
+            )}
           </div>
         )}
       </div>
